@@ -101,7 +101,7 @@ int main(){
 		free(indices);
 	}
 
-	g_camera.init(vec3(0,2,5), vec3(0,0,0));
+	init_camera(&g_camera, vec3(0,2,5), vec3(0,0,0));
 	
 	init_debug_draw();
 
@@ -178,8 +178,8 @@ int main(){
 		}
 		
 		//Update camera
-		if(freecam_mode)g_camera.update_debug(dt);
-		else g_camera.update_player(player_pos, dt);
+		if(freecam_mode)update_camera_debug(&g_camera, dt);
+		else update_camera_player(&g_camera, player_pos, dt);
 
 		draw_vec(player_pos+vec3(0,0.75,0), player_fwd);
 
