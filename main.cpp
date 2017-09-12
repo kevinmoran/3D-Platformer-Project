@@ -21,7 +21,7 @@ bool gl_fullscreen = false;
 #include "Player.h"
 
 int main(){
-	if(!init_gl(window, "Character Controller 3D", gl_width, gl_height)){ return 1; }
+	if(!init_gl(window, "3D Platformer", gl_width, gl_height)){ return 1; }
 
 	//Load player mesh
 	GLuint player_vao;
@@ -181,19 +181,17 @@ int main(){
 		if(freecam_mode)g_camera.update_debug(dt);
 		else g_camera.update_player(player_pos, dt);
 
-		draw_vec(player_pos+vec3(0,0.5,0), player_fwd);
+		draw_vec(player_pos+vec3(0,0.75,0), player_fwd);
 
 		glUseProgram(basic_shader.id);
 		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
 		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
 
 		//Draw player
-		// glBindVertexArray(player_vao);
-		glBindVertexArray(cube_vao);
+		glBindVertexArray(player_vao);
 		glUniform4fv(colour_loc, 1, player_colour.v);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player_M.m);
-        // glDrawElements(GL_TRIANGLES, player_num_indices, GL_UNSIGNED_SHORT, 0);
-        glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, player_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		//Draw ground
 		glBindVertexArray(cube_vao);
