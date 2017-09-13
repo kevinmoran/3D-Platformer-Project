@@ -19,7 +19,7 @@ float player_top_speed = 10.0f;
 float player_time_till_top_speed = 0.25f; //Human reaction time?
 float player_acc = player_top_speed/player_time_till_top_speed;
 float friction_factor = 0.3f; //higher is slippier
-float player_jump_height = 2.0f;
+float player_jump_height = 3.0f;
 float player_jump_dist_to_peak = 2.0f; //how far on xz p moves before reaching peak jump height
 float g = -2*player_jump_height*player_top_speed*player_top_speed/(player_jump_dist_to_peak*player_jump_dist_to_peak);
 float jump_vel = 2*player_jump_height*player_top_speed/player_jump_dist_to_peak;
@@ -110,7 +110,7 @@ void player_update(double dt){
     else { //Player is not on ground
         if(player_is_jumping){
             //If you don't hold jump you don't jump as high
-            if(!g_input[JUMP] && player_vel.y>0) player_vel.y += 5*g*dt;
+            if(!g_input[JUMP] && player_vel.y>0) player_vel.y += g*dt;
         }
 
         //Clamp player's xz speed
