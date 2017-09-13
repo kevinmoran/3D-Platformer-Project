@@ -145,6 +145,14 @@ int main(){
 			}
 			else tab_was_pressed = false;
 
+			//M to toggle between mouse/arrow key controls for camera
+			static bool m_was_pressed = false;
+			if(glfwGetKey(window, GLFW_KEY_M)) {
+				if(!m_was_pressed) { cam_mouse_controls = !cam_mouse_controls; }
+				m_was_pressed = true;
+			}
+			else m_was_pressed = false;
+
 			//Ctrl/Command-F to toggle fullscreen
 			//Note: window_resize_callback takes care of resizing viewport/recalculating P matrix
 			static bool F_was_pressed = false;

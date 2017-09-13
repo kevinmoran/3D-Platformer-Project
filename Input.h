@@ -20,7 +20,7 @@ enum INPUT_COMMANDS{
     NUM_INPUT_COMMANDS
 };
 
-const float MOUSE_DEFAULT_SENSITIVITY = 0.4f;
+const float MOUSE_DEFAULT_SENSITIVITY = 0.2f;
 struct Mouse {
     bool click_left;
     bool click_right;
