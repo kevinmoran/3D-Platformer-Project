@@ -176,18 +176,33 @@ int main(){
 			else F_was_pressed = false;
 		}
 
-		//Move player
-		if(!freecam_mode) player_update(dt);
-		if(player_pos.y<0){
-			player_is_jumping = false;
-			player_is_on_ground = true;
-			player_pos.y = 0;
-			player_vel.y = 0;
-		}
+		//Timer for updating game simulation with fixed time step
+		static double sim_time = 0;
+		const double FIXED_TIME_STEP = 1.0/200;
+		sim_time += dt;
 		
-		//Update camera
-		if(freecam_mode)update_camera_debug(&g_camera, dt);
-		else update_camera_player(&g_camera, player_pos, dt);
+		//Simulation
+		while(sim_time>0){
+			// Note: Because once per frame we simulate with dt < fixed time step, the game 
+			// will not be 100% deterministic. Use a different method if that matters!
+			double sim_dt = MIN(sim_time, FIXED_TIME_STEP);
+			
+			//Move player
+			if(!freecam_mode) player_update(sim_dt);
+			if(player_pos.y<0){
+				player_is_jumping = false;
+				player_is_on_ground = true;
+				player_pos.y = 0;
+				player_vel.y = 0;
+			}
+			
+			//Update camera
+			if(freecam_mode)update_camera_debug(&g_camera, sim_dt);
+			else update_camera_player(&g_camera, player_pos, sim_dt);
+
+			sim_time -= sim_dt;
+		}
+
 
 		draw_vec(player_pos+vec3(0,0.75,0), player_fwd);
 
