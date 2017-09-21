@@ -71,7 +71,7 @@ int main(){
 		float* vt = NULL;
 		uint16_t* indices = NULL;
 		unsigned int num_verts = 0;
-		load_obj_indexed("cube.obj", &vp, &vt, &vn, &indices, &num_verts, &cube_num_indices, false);
+		load_obj_indexed("cube.obj", &vp, &vt, &vn, &indices, &num_verts, &cube_num_indices);
 
 		glGenVertexArrays(1, &cube_vao);
 		glBindVertexArray(cube_vao);
@@ -178,7 +178,7 @@ int main(){
 
 		//Timer for updating game simulation with fixed time step
 		static double sim_time = 0;
-		const double FIXED_TIME_STEP = 1.0/200;
+		const double FIXED_TIME_STEP = 1.0/240;
 		sim_time += dt;
 		
 		//Simulation
@@ -202,7 +202,6 @@ int main(){
 
 			sim_time -= sim_dt;
 		}
-
 
 		draw_vec(player_pos+vec3(0,0.75,0), player_fwd);
 
