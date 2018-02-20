@@ -1,13 +1,18 @@
 #pragma once
-// #include <GLFW/glfw3.h>
-// #include <stdio.h>
-// #include "Input.h"
+#include "gl_lite.h"
+#include <GLFW/glfw3.h>
+#include <stdio.h>
+#include "Input.h"
+#include "Camera3D.h"
+
+bool init_gl(GLFWwindow* &window, const char* title, int window_width, int window_height);
+void window_resize_callback(GLFWwindow* window, int width, int height);
 
 bool init_gl(GLFWwindow* &window, const char* title, int window_width, int window_height) {
 
 	/* start GL context and O/S window using the GLFW helper library */
 	if(!glfwInit()) {
-		fprintf(stderr, "ERROR: could not start GLFW3\n");
+		fprintf(stderr, "Error: glfwInit failed\n");
 		getchar();
 		return false;
 	}
@@ -21,7 +26,7 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 
 	window = glfwCreateWindow(window_width, window_height, title, NULL, NULL);
 	if(!window) {
-		fprintf(stderr, "ERROR: could not open window with GLFW3\n");
+		fprintf(stderr, "Error: glfwCreateWindow failed\n");
 		glfwTerminate();
 		getchar();
 		return false;
@@ -40,8 +45,12 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 	glfwSetJoystickCallback(joystick_callback);
 	glfwSwapInterval(1);
 
+    if(cam_mouse_controls) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+
 	init_joystick();
-	
+
+	g_mouse.sensitivity = MOUSE_DEFAULT_SENSITIVITY;
+
 	//Load OpenGL functions
 	if(!gl_lite_init()){
 		printf("Error in gl_lite_init\n");
@@ -66,6 +75,16 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 	return true;
 }
 
+void window_resize_callback(GLFWwindow* window, int width, int height){
+    gl_width = width;
+    gl_height = height;
+    gl_aspect_ratio = (float)gl_width/gl_height;
+    g_camera.P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, near_plane, far_plane);
+    int fb_w, fb_h;
+	glfwGetFramebufferSize(window, &fb_w, &fb_h);
+	glViewport(0, 0, fb_w, fb_h);
+}
+
 //Custom assert function which pauses program in debugger instead of crashing
 //TODO put this somewhere sensible!
 #if defined(__clang__) || defined(__GNUC__)
@@ -75,10 +94,10 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 #endif
 
 #define assert(exp) \
-	{if(!(exp)) { \
-		printf("Assertion failed in %s, Line %d:\n%s\n...", __FILE__, __LINE__, #exp); \
-		_BREAKPOINT_CALL; \
-	}} \
+{if(!(exp)) { \
+	printf("Assertion failed in %s, Line %d:\n%s\n...", __FILE__, __LINE__, #exp); \
+	_BREAKPOINT_CALL; \
+}} \
 
 //OpenGL Error checking (very limited but all you have for versions below 4.3)
 #define check_gl_error() _checkOglError(__FILE__, __LINE__)

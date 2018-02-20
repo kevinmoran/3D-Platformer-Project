@@ -1,10 +1,13 @@
 #pragma once
 
+#include "GameMaths.h"
+
 //Simple functions to draw debug/visualisation stuff
 void init_debug_draw();
 void draw_point(vec3 pos, float size, vec4 colour=vec4(0.8f,0,0,1));
 void draw_vec(vec3 origin, vec3 dir, vec4 colour=vec4(0.8f,0,0,1));
 
+#ifdef DEBUG_DRAWING_IMPLEMENTATION
 //Internal data
 static GLuint quad_vao;
 static Shader debug_shader;
@@ -95,3 +98,5 @@ void draw_vec(vec3 origin, vec3 dir, vec4 colour){
 
     draw_point(origin+dir, 0.15f, colour);
 }
+
+#endif //DEBUG_DRAWING_IMPLEMENTATION

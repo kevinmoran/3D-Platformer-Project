@@ -8,3 +8,5 @@
 .vscode/
 *.dSYM/
 *.blend1
+.DS_Store
+3D_Platformer
