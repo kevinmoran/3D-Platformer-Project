@@ -22,15 +22,15 @@ static float player_gravity = -2*player_jump_height*player_top_speed*player_top_
 static float jump_vel = 2*player_jump_height*player_top_speed/player_jump_dist_to_peak;
 
 void init_player(Player* player){
-    player->pos = vec3(0,0,0);
-    player->scale = vec3(0.25, 0.5, 0.25);
+    player->pos = {};
+    player->scale = {0.25, 0.5, 0.25};
     player->R = identity_mat4();
     player->M = translate(player->R*scale(identity_mat4(), player->scale), player->pos);
-    player->vel = vec3(0,0,0);
-    player->fwd = vec3(0,0,-1);
+    player->vel = {};
+    player->fwd = {0,0,-1};
     player->is_on_ground = false;
     player->is_jumping = false;
-    player->colour = vec4(0.1f, 0.8f, 0.3f, 1.0f);
+    player->colour = {0.1f, 0.8f, 0.3f, 1.0f};
 }
 
 void update_player(Player* player, const Camera3D &camera, double dt){
@@ -38,11 +38,11 @@ void update_player(Player* player, const Camera3D &camera, double dt){
     bool player_moved = false;
 
     //WASD Movement (constrained to the x-z plane)
-    vec3 player_movement_dir = vec3(0,0,0);
+    vec3 player_movement_dir = {};
     {
         //Find player's forward and right movement directions
-        vec3 cam_fwd_xz_proj = normalise(vec3(camera.fwd.x, 0, camera.fwd.z));
-        vec3 cam_rgt_xz_proj = normalise(vec3(camera.rgt.x, 0, camera.rgt.z));
+        vec3 cam_fwd_xz_proj = normalise(vec3{camera.fwd.x, 0, camera.fwd.z});
+        vec3 cam_rgt_xz_proj = normalise(vec3{camera.rgt.x, 0, camera.rgt.z});
 
         float decel_factor = 1.;
 
@@ -87,7 +87,7 @@ void update_player(Player* player, const Camera3D &camera, double dt){
             if(cross_prod.y<0) rotation_amount *= -1;
             
             player->R = rotate_y_deg(player->R,rotation_amount);
-            player->fwd = -vec3(player->R.m[8],player->R.m[9],player->R.m[10]);
+            player->fwd = -vec3{player->R.m[8], player->R.m[9], player->R.m[10]};
         }
     }
 
@@ -100,7 +100,7 @@ void update_player(Player* player, const Camera3D &camera, double dt){
         if(player_speed > player_top_speed){
             player->vel = player->vel*player_top_speed/player_speed;
         }
-        if(player_speed<0.0001) player->vel = vec3(0,0,0);
+        if(player_speed<0.0001) player->vel = {};
 
         //Deceleration
         if(!player_moved) player->vel *= friction_factor;
@@ -123,7 +123,7 @@ void update_player(Player* player, const Camera3D &camera, double dt){
         }
 
         //Clamp player's xz speed
-        vec3 xz_vel = vec3(player->vel.x, 0, player->vel.z);
+        vec3 xz_vel = {player->vel.x, 0, player->vel.z};
         if(length(xz_vel) > player_top_speed) {
             xz_vel = normalise(xz_vel);
             xz_vel *= player_top_speed;

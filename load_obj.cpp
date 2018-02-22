@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "GameMaths.h"
+
 #define OBJ_PATH "Meshes/"
 #define OBJLOAD_LINE_SIZE 256
 
@@ -570,12 +572,12 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 					//than .obj for indexed meshes with UVs! Run this horrorshow once and convert to a better format ***
 					bool found_duplicate = false;
 					//Get vertex data for the vert we're about to add:
-					vec3 vp_curr = vec3(vp_unsorted[3*curr_ind],    vp_unsorted[3*curr_ind+1],    vp_unsorted[3*curr_ind+2]);
-					vec3 vn_curr = vec3(vn_unsorted[3*vn_index[i]], vn_unsorted[3*vn_index[i]+1], vn_unsorted[3*vn_index[i]+2]);
+					vec3 vp_curr = vec3{vp_unsorted[3*curr_ind],    vp_unsorted[3*curr_ind+1],    vp_unsorted[3*curr_ind+2]};
+					vec3 vn_curr = vec3{vn_unsorted[3*vn_index[i]], vn_unsorted[3*vn_index[i]+1], vn_unsorted[3*vn_index[i]+2]};
 					for(int j=index_it-1; j>=0; --j){ //iterate backwards, dupe verts are usually close
 						//Get jth vertex data
-						vec3 vp_j = vec3((*vp)[3*(*indices)[j]], (*vp)[3*(*indices)[j]+1], (*vp)[3*(*indices)[j]+2]);
-						vec3 vn_j = vec3((*vn)[3*(*indices)[j]], (*vn)[3*(*indices)[j]+1], (*vn)[3*(*indices)[j]+2]);
+						vec3 vp_j = vec3{(*vp)[3*(*indices)[j]], (*vp)[3*(*indices)[j]+1], (*vp)[3*(*indices)[j]+2]};
+						vec3 vn_j = vec3{(*vn)[3*(*indices)[j]], (*vn)[3*(*indices)[j]+1], (*vn)[3*(*indices)[j]+2]};
 
 						//Check if jth vertex is the same as new vertex
 						if(vp_curr == vp_j){
@@ -633,12 +635,12 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 					//than .obj for indexed meshes with UVs! Run this horrorshow once and convert to a better format ***
 					bool found_duplicate = false;
 					//Get vertex data for the vert we're about to add:
-					vec3 vp_curr = vec3(vp_unsorted[3*curr_ind],    vp_unsorted[3*curr_ind+1], vp_unsorted[3*curr_ind+2]);
-					vec2 vt_curr = vec2(vt_unsorted[2*vt_index[i]], vt_unsorted[2*vt_index[i]+1]);
+					vec3 vp_curr = vec3{vp_unsorted[3*curr_ind],    vp_unsorted[3*curr_ind+1], vp_unsorted[3*curr_ind+2]};
+					vec2 vt_curr = vec2{vt_unsorted[2*vt_index[i]], vt_unsorted[2*vt_index[i]+1]};
 					for(int j=index_it-1; j>=0; --j){ //iterate backwards, dupe verts are usually close
 						//Get jth vertex data
-						vec3 vp_j = vec3((*vp)[3*(*indices)[j]], (*vp)[3*(*indices)[j]+1], (*vp)[3*(*indices)[j]+2]);
-						vec2 vt_j = vec2((*vt)[2*(*indices)[j]], (*vt)[2*(*indices)[j]+1]);
+						vec3 vp_j = vec3{(*vp)[3*(*indices)[j]], (*vp)[3*(*indices)[j]+1], (*vp)[3*(*indices)[j]+2]};
+						vec2 vt_j = vec2{(*vt)[2*(*indices)[j]], (*vt)[2*(*indices)[j]+1]};
 
 						//Check if jth vertex is the same as new vertex
 						if((vp_curr ==vp_j) && (vt_curr == vt_j)){
@@ -689,14 +691,14 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 					//than .obj for indexed meshes with UVs! Run this horrorshow once and convert to a better format ***
 					bool found_duplicate = false;
 					//Get vertex data for the vert we're about to add:
-					vec3 vp_curr = vec3(vp_unsorted[3*curr_ind],    vp_unsorted[3*curr_ind+1], vp_unsorted[3*curr_ind+2]);
-					vec2 vt_curr = vec2(vt_unsorted[2*vt_index[i]], vt_unsorted[2*vt_index[i]+1]);
-					vec3 vn_curr = vec3(vn_unsorted[3*vn_index[i]], vn_unsorted[3*vn_index[i]+1], vn_unsorted[3*vn_index[i]+2]);
+					vec3 vp_curr = vec3{vp_unsorted[3*curr_ind],    vp_unsorted[3*curr_ind+1], vp_unsorted[3*curr_ind+2]};
+					vec2 vt_curr = vec2{vt_unsorted[2*vt_index[i]], vt_unsorted[2*vt_index[i]+1]};
+					vec3 vn_curr = vec3{vn_unsorted[3*vn_index[i]], vn_unsorted[3*vn_index[i]+1], vn_unsorted[3*vn_index[i]+2]};
 					for(int j=index_it-1; j>=0; --j){ //iterate backwards, dupe verts are usually close
 						//Get jth vertex data
-						vec3 vp_j = vec3((*vp)[3*(*indices)[j]], (*vp)[3*(*indices)[j]+1], (*vp)[3*(*indices)[j]+2]);
-						vec2 vt_j = vec2((*vt)[2*(*indices)[j]], (*vt)[2*(*indices)[j]+1]);
-						vec3 vn_j = vec3((*vn)[3*(*indices)[j]], (*vn)[3*(*indices)[j]+1], (*vn)[3*(*indices)[j]+2]);
+						vec3 vp_j = vec3{(*vp)[3*(*indices)[j]], (*vp)[3*(*indices)[j]+1], (*vp)[3*(*indices)[j]+2]};
+						vec2 vt_j = vec2{(*vt)[2*(*indices)[j]], (*vt)[2*(*indices)[j]+1]};
+						vec3 vn_j = vec3{(*vn)[3*(*indices)[j]], (*vn)[3*(*indices)[j]+1], (*vn)[3*(*indices)[j]+2]};
 
 						//Check if jth vertex is the same as new vertex
 						if((vp_curr == vp_j) && (vt_curr == vt_j)) {
@@ -757,7 +759,7 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 	//Normalise vn
 	if(num_vns>0){
 		for(unsigned int i=0; i<*vert_count*3; i+=3){
-			vec3 temp = vec3((*vn)[i], (*vn)[i+1], (*vn)[i+2]);
+			vec3 temp = vec3{(*vn)[i], (*vn)[i+1], (*vn)[i+2]};
 			temp = normalise(temp);
 			(*vn)[i]   = temp.x;
 			(*vn)[i+1] = temp.y;

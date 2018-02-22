@@ -22,7 +22,6 @@ bool gl_fullscreen = false;
 #include "DebugDrawing.h"
 #undef DEBUG_DRAWING_IMPLEMENTATION
 
-#include "GameMaths.cpp"
 #include "Input.cpp"
 #include "Camera3D.cpp"
 #include "Shader.cpp"
@@ -110,7 +109,7 @@ int main(){
 		free(indices);
 	}
 
-	init_camera(&g_camera, vec3(0,2,5), vec3(0,0,0));
+	init_camera(&g_camera, vec3{0,2,5}, vec3{0,0,0});
 
 	init_player(&g_player);
 	
@@ -216,7 +215,7 @@ int main(){
 			sim_time -= sim_dt;
 		}
 
-		draw_vec(g_player.pos+vec3(0,0.75,0), g_player.fwd);
+		draw_vec(g_player.pos+vec3{0,0.75,0}, g_player.fwd);
 
 		glUseProgram(basic_shader.id);
 		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
@@ -230,21 +229,21 @@ int main(){
 
 		//Draw ground
 		glBindVertexArray(cube_vao);
-		glUniform4fv(colour_loc, 1, vec4(0.8,0.1,0.2,1).v);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3(25,0.1,25)),vec3(0,-0.25,0)).m);
+		glUniform4fv(colour_loc, 1, vec4{0.8f, 0.1f, 0.2f, 1}.v);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3{25, 0.1, 25}), vec3{0, -0.25 ,0}).m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		//Draw some boxes
-		glUniform4fv(colour_loc, 1, vec4(0.2,0.1,0.8,1).v);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3(5,1,5)),vec3(-7,0,-3)).m);
+		glUniform4fv(colour_loc, 1, vec4{0.2f, 0.1f, 0.8f, 1}.v);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3{5, 1, 5}),vec3{-7, 0, -3}).m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3(5,1,5)),vec3(11,0,-4)).m);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3{5, 1, 5}),vec3{11, 0, -4}).m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3(5,10,5)),vec3(0,0,-11)).m);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3{5, 10, 5}),vec3{0, 0, -11}).m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3(5,1,5)),vec3(-5,0,4)).m);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3{5, 1, 5}),vec3{-5, 0, 4}).m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3(5,1,5)),vec3(3,0,-6)).m);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3{5, 1, 5}),vec3{3, 0, -6}).m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glfwSwapBuffers(g_window);

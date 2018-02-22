@@ -4,8 +4,8 @@
 
 //Simple functions to draw debug/visualisation stuff
 void init_debug_draw();
-void draw_point(vec3 pos, float size, vec4 colour=vec4(0.8f,0,0,1));
-void draw_vec(vec3 origin, vec3 dir, vec4 colour=vec4(0.8f,0,0,1));
+void draw_point(vec3 pos, float size, vec4 colour=vec4{0.8f, 0, 0, 1});
+void draw_vec(vec3 origin, vec3 dir, vec4 colour=vec4{0.8f, 0, 0, 1});
 
 #ifdef DEBUG_DRAWING_IMPLEMENTATION
 //Internal data
@@ -13,7 +13,7 @@ static GLuint quad_vao;
 static Shader debug_shader;
 
 void init_debug_draw(){
-    GLfloat points[] = {
+    float points[] = {
 		-0.5f,	0.5f, 0,
 		-0.5f, -0.5f, 0,
 		 0.5f, -0.5f, 0,
@@ -58,12 +58,12 @@ void draw_point(vec3 pos, float size, vec4 colour){
 }
 
 void draw_vec(vec3 origin, vec3 dir, vec4 colour){
-    mat4 M = translate(identity_mat4(), vec3(0,0.5f,0)); //move base of quad to origin
+    mat4 M = translate(identity_mat4(), vec3{0, 0.5f, 0}); //move base of quad to origin
     float dist = length(dir);
-    M = scale(M, vec3(0.05f,dist,0.05f));
+    M = scale(M, vec3{0.05f, dist, 0.05f});
 
     //First rotate quad so its 'up' vector is dir
-    mat4 R = rotate_align(vec3(0,1,0), normalise(dir));
+    mat4 R = rotate_align(vec3{0, 1, 0}, normalise(dir));
 
     // Billboarding - rotate quad around dir so its normal is facing camera (as much as possible)
     // From https://www.opengl.org/discussion_boards/archive/index.php/t-147495.html
@@ -73,13 +73,13 @@ void draw_vec(vec3 origin, vec3 dir, vec4 colour){
 
     //Cool trick to project vector onto a plane: project it onto plane's normal
     //and subtract that projection from the original vector
-    vec3 rot_sweep_plane_norm = R*vec4(0,-1,0,0); //normal of plane swept by rotating billboard's normal around dir
-    vec3 billboard_center = origin + dir*0.5f;
+    vec3 rot_sweep_plane_norm = (R*vec4{0,-1,0,0}).xyz; //normal of plane swept by rotating billboard's normal around dir
+    vec3 billboard_center = origin + 0.5f*dir;
     vec3 v_to_cam = g_camera.pos - billboard_center;
     float norm_proj = dot(v_to_cam, rot_sweep_plane_norm); //project vec onto norm
     vec3 plane_proj = v_to_cam - (rot_sweep_plane_norm*norm_proj); //find projection onto plane (our target quad norm!)
 
-    vec3 quad_norm = R*vec4(0,0,1,0);
+    vec3 quad_norm = (R*vec4{0,0,1,0}).xyz;
     
     mat4 billboard_mat = rotate_align(quad_norm, normalise(plane_proj));
 

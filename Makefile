@@ -7,7 +7,7 @@ BUILD_DIR =
 
 CXX = g++
 #General compiler flags
-COMPILER_FLAGS = -Wall -pedantic
+COMPILER_FLAGS = -Wall -pedantic -std=gnu++11
 
 #Debug/Release build flags
 DEBUG_FLAGS = -g -DDEBUG
@@ -15,7 +15,7 @@ RELEASE_FLAGS = -O3
 
 #Platform-specific flags
 FLAGS_WIN32 = 
-FLAGS_MAC = -mmacosx-version-min=10.9 -arch x86_64 -fmessage-length=0 -stdlib=libc++
+FLAGS_MAC = -mmacosx-version-min=10.9 -arch x86_64 -fmessage-length=0 -stdlib=libc++ -Wno-missing-braces
 
 #Additional include directories (common/platform-specific)
 INCLUDE_COMMON = -I include
@@ -55,8 +55,9 @@ else
         INCLUDE_DIRS = $(INCLUDE_COMMON) $(INCLUDE_DIRS_MAC)
         LIBS = $(LIBS_MAC)
         SYS_LIBS = $(FRAMEWORKS)
+		PREBUILD =clear;
 		ifneq ($(BUILD_DIR),) #Check if build dir was specified, don't try to create one if not
-        	PREBUILD = @mkdir -p $(BUILD_DIR)
+        	PREBUILD =clear; @mkdir -p $(BUILD_DIR)
 		endif
 	else
 		#--- LINUX --- TODO?
