@@ -25,7 +25,7 @@ void init_player(Player* player){
     player->pos = {};
     player->scale = {0.25, 0.5, 0.25};
     player->R = identity_mat4();
-    player->M = translate(player->R*scale(identity_mat4(), player->scale), player->pos);
+    player->M = translate(player->R * scale_mat4(player->scale), player->pos);
     player->vel = {};
     player->fwd = {0,0,-1};
     player->is_on_ground = false;
@@ -86,7 +86,7 @@ void update_player(Player* player, const Camera3D &camera, double dt){
             vec3 cross_prod = cross(player->fwd, player_movement_dir);
             if(cross_prod.y<0) rotation_amount *= -1;
             
-            player->R = rotate_y_deg(player->R,rotation_amount);
+            player->R = player->R * rotate_y_deg_mat4(rotation_amount);
             player->fwd = -vec3{player->R.m[8], player->R.m[9], player->R.m[10]};
         }
     }
@@ -137,5 +137,5 @@ void update_player(Player* player, const Camera3D &camera, double dt){
     player->pos += player->vel*dt;
 
     //Update matrices
-    player->M = translate(player->R*scale(identity_mat4(), player->scale), player->pos);
+    player->M = translate(player->R * scale_mat4(player->scale), player->pos);
 }

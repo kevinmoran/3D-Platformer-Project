@@ -73,7 +73,7 @@ void draw_vec(vec3 origin, vec3 dir, vec4 colour)
     M = scale(M, vec3{0.05f, dist, 0.05f});
 
     // First rotate quad so its 'up' vector is dir
-    mat4 R = rotate_align(vec3{0, 1, 0}, normalise(dir));
+    mat4 R = rotate_align_mat4(vec3{0, 1, 0}, normalise(dir));
 
     // Billboarding - rotate quad around dir so its normal is facing camera (as much as possible)
     // From https://www.opengl.org/discussion_boards/archive/index.php/t-147495.html
@@ -91,7 +91,7 @@ void draw_vec(vec3 origin, vec3 dir, vec4 colour)
 
     vec3 quad_norm = (R*vec4{0,0,1,0}).xyz;
     
-    mat4 billboard_mat = rotate_align(quad_norm, normalise(plane_proj));
+    mat4 billboard_mat = rotate_align_mat4(quad_norm, normalise(plane_proj));
 
     M = billboard_mat * R * M;
     M = translate(M, origin);

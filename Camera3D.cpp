@@ -79,7 +79,7 @@ void update_camera(Camera3D* cam, CameraMode cam_mode, vec3 player_pos, double d
     cam->pitch = CLAMP(cam->pitch, -85, 80);
 
     //Update matrices
-    mat4 R = rotate_y_deg(rotate_x_deg(identity_mat4(), cam->pitch), cam->yaw);
+    mat4 R = rotate_y_deg_mat4(cam->yaw) * rotate_x_deg_mat4(cam->pitch);
     cam->rgt = (R*vec4{1,0,0,0}).xyz;
     cam->up  = (R*vec4{0,1,0,0}).xyz;
     cam->fwd = (R*vec4{0,0,-1,0}).xyz;
@@ -88,5 +88,5 @@ void update_camera(Camera3D* cam, CameraMode cam_mode, vec3 player_pos, double d
         cam->pos = player_pos - (5*cam->fwd) + (2*cam->up);
 
     cam->V = translate(identity_mat4(), -cam->pos);
-    cam->V = inverse(R)*cam->V;
+    cam->V = transpose(R)*cam->V;
 }

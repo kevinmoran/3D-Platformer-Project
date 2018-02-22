@@ -229,20 +229,31 @@ int main(){
 		//Draw ground
 		glBindVertexArray(cube_vao);
 		glUniform4fv(colour_loc, 1, vec4{0.8f, 0.1f, 0.2f, 1}.v);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3{25, 0.1, 25}), vec3{0, -0.25 ,0}).m);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale_mat4(vec3{25, 0.1, 25}), vec3{0, -0.25 ,0}).m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		//Draw some boxes
 		glUniform4fv(colour_loc, 1, vec4{0.2f, 0.1f, 0.8f, 1}.v);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3{5, 1, 5}),vec3{-7, 0, -3}).m);
+
+		mat4 box_model_mat;
+		box_model_mat = translate(scale_mat4(vec3{5, 1, 5}), vec3{-7, 0, -3});
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat.m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3{5, 1, 5}),vec3{11, 0, -4}).m);
+		
+		box_model_mat = translate(scale_mat4(vec3{5, 1, 5}), vec3{11, 0, -4});
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat.m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3{5, 10, 5}),vec3{0, 0, -11}).m);
+
+		box_model_mat = translate(scale_mat4(vec3{5, 10, 5}), vec3{0, 0, -11});
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat.m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3{5, 1, 5}),vec3{-5, 0, 4}).m);
+
+		box_model_mat = translate(scale_mat4(vec3{5, 1, 5}), vec3{-5, 0, 4});
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat.m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), vec3{5, 1, 5}),vec3{3, 0, -6}).m);
+
+		box_model_mat = translate(scale_mat4(vec3{5, 1, 5}), vec3{3, 0, -6});
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat.m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glfwSwapBuffers(g_window);

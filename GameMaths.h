@@ -76,11 +76,15 @@ inline mat4 transpose(mat4 mm);
 // affine functions
 inline mat4 translate(mat4 m, vec3 v);
 inline mat4 rotate_x_deg(mat4 m, float deg);
+inline mat4 rotate_x_deg_mat4(float deg);
 inline mat4 rotate_y_deg(mat4 m, float deg);
+inline mat4 rotate_y_deg_mat4(float deg);
 inline mat4 rotate_z_deg(mat4 m, float deg);
-inline mat4 rotate_axis_deg(vec3 u, float deg);
-inline mat4 rotate_align(vec3 u1, vec3 u2);
+inline mat4 rotate_z_deg_mat4(float deg);
+inline mat4 rotate_axis_deg_mat4(vec3 u, float deg);
+inline mat4 rotate_align_mat4(vec3 u1, vec3 u2);
 inline mat4 scale(mat4 m, vec3 v);
+inline mat4 scale_mat4(vec3 v);
 inline mat4 scale(mat4 m, float s);
 
 // camera functions
@@ -700,6 +704,19 @@ inline mat4 rotate_x_deg(mat4 m, float deg) {
 	return m_r * m;
 }
 
+// Returns matrix to rotate about x-axis by deg degrees
+inline mat4 rotate_x_deg_mat4(float deg) {
+	float rad = DEG2RAD(deg);
+	mat4 result = identity_mat4();
+	float sin_theta = sinf(rad);
+	float cos_theta = cosf(rad);
+	result.m[5] = cos_theta;
+	result.m[9] = -sin_theta;
+	result.m[6] = sin_theta;
+	result.m[10] = cos_theta;
+	return result;
+}
+
 // Returns matrix m rotated about y-axis by deg degrees
 inline mat4 rotate_y_deg(mat4 m, float deg) {
 	float rad = DEG2RAD(deg);
@@ -711,6 +728,19 @@ inline mat4 rotate_y_deg(mat4 m, float deg) {
 	m_r.m[2] = -sin_theta;
 	m_r.m[10] = cos_theta;
 	return m_r * m;
+}
+
+// Returns matrix to rotate about y-axis by deg degrees
+inline mat4 rotate_y_deg_mat4(float deg) {
+	float rad = DEG2RAD(deg);
+	mat4 result = identity_mat4();
+	float sin_theta = sinf(rad);
+	float cos_theta = cosf(rad);
+	result.m[0] = cos_theta;
+	result.m[8] = sin_theta;
+	result.m[2] = -sin_theta;
+	result.m[10] = cos_theta;
+	return result;
 }
 
 // Returns matrix m rotated about z-axis by deg degrees
@@ -726,9 +756,22 @@ inline mat4 rotate_z_deg(mat4 m, float deg) {
 	return m_r * m;
 }
 
+// Returns matrix to rotate about z-axis by deg degrees
+inline mat4 rotate_z_deg_mat4(float deg) {
+	float rad = DEG2RAD(deg);
+	mat4 result = identity_mat4();
+	float sin_theta = sinf(rad);
+	float cos_theta = cosf(rad);
+	result.m[0] = cos_theta;
+	result.m[4] = -sin_theta;
+	result.m[1] = sin_theta;
+	result.m[5] = cos_theta;
+	return result;
+}
+
 // Returns rotation matrix to rotate around (NORMALISED!) axis 'u' by 'deg' degrees
 //from http://www.iquilezles.org/www/articles/noacos/noacos.htm
-inline mat4 rotate_axis_deg(vec3 u, float deg){
+inline mat4 rotate_axis_deg_mat4(vec3 u, float deg){
 	float rad = DEG2RAD(deg);
 
 	float sin_a = sinf(rad);
@@ -754,7 +797,7 @@ inline mat4 rotate_axis_deg(vec3 u, float deg){
 
 // Returns rotation matrix to align u1 with u2 (MUST BE UNIT VECTORS)
 //from http://www.iquilezles.org/www/articles/noacos/noacos.htm
-inline mat4 rotate_align(vec3 u1, vec3 u2){
+inline mat4 rotate_align_mat4(vec3 u1, vec3 u2){
 	vec3 axis = cross(u1,u2);
 	float cos_a = dot(u1,u2);
     float k = 1.0f/(1.0f+cos_a);
@@ -796,6 +839,16 @@ inline mat4 scale(mat4 m, vec3 v) {
 	result.m[9] *= v.z;
 	result.m[10] *= v.z;
 	result.m[11] *= v.z;
+	return result;
+}
+
+// Returns matrix to scale by [x, y, z]
+inline mat4 scale_mat4(vec3 v) {
+	mat4 result = {};
+	result.m[0] = v.x;
+	result.m[5] = v.y;
+	result.m[10] = v.z;
+	result.m[15] = 1.0f;
 	return result;
 }
 
