@@ -163,6 +163,6 @@ if(text) insert_text(text);
 /* //File/Path Drop
 //glfwSetDropCallback(window, drop_callback);
 void drop_callback(GLFWwindow* window, int count, const char** paths){
-    for(int i = 0;  i < count;  i++) handle_dropped_file(paths[i]);
+    for(int i = 0;  i < count;  ++i) handle_dropped_file(paths[i]);
 }
 */

@@ -31,11 +31,11 @@ bool load_obj(const char* file_name, float** vp, uint32_t* vert_count){
 	//Count number of elements
 	while(fgets(line, OBJLOAD_LINE_SIZE, fp)){
 		if(line[0]=='v'){
-			if(line[1]==' ') num_vps++;
-			else if(line[1]=='t') num_vts++;
-			else if(line[1]=='n') num_vns++;
+			if(line[1]==' ') ++num_vps;
+			else if(line[1]=='t') ++num_vts;
+			else if(line[1]=='n') ++num_vns;
 		}
-		else if(line[0]=='f') num_faces++;
+		else if(line[0]=='f') ++num_faces;
 	}
 	rewind(fp);
 
@@ -63,7 +63,7 @@ bool load_obj(const char* file_name, float** vp, uint32_t* vert_count){
 				printf("Observed format: %s\n", line);
 				return false;
 			}
-			unsort_vp_it+=1;
+			++unsort_vp_it;
 		}
 		else if(line[0]=='f'){
 			uint16_t indices[3];
@@ -105,11 +105,11 @@ bool load_obj(const char* file_name, float** vp, uint32_t* vert_count){
 				}
 			}
 			for(int i=0; i<3; ++i){
-				indices[i]-=1; //wavefront obj doesn't use zero indexing
+				--indices[i]; //wavefront obj doesn't use zero indexing
 				(*vp)[3*vp_it  ] = vp_unsorted[3*indices[i]];   //x
 				(*vp)[3*vp_it+1] = vp_unsorted[3*indices[i]+1]; //y
 				(*vp)[3*vp_it+2] = vp_unsorted[3*indices[i]+2]; //z
-				vp_it+=1;
+				++vp_it;
 			}
 		}//end elseif for 'f'
 	}//endwhile
@@ -142,11 +142,11 @@ bool load_obj(const char* file_name, float** vp, float** vt, float** vn, uint32_
 	//Count number of elements
 	while(fgets(line, OBJLOAD_LINE_SIZE, fp)){
 		if(line[0]=='v'){
-			if(line[1]==' ') num_vps++;
-			else if(line[1]=='t') num_vts++;
-			else if(line[1]=='n') num_vns++;
+			if(line[1]==' ') ++num_vps;
+			else if(line[1]=='t') ++num_vts;
+			else if(line[1]=='n') ++num_vns;
 		}
-		else if(line[0]=='f') num_faces++;
+		else if(line[0]=='f') ++num_faces;
 	}
 	rewind(fp);
 
@@ -190,7 +190,7 @@ bool load_obj(const char* file_name, float** vp, float** vt, float** vn, uint32_
 					printf("Observed format: %s\n", line);
 					return false;
 				}
-				unsort_vp_it+=1;
+				++unsort_vp_it;
 			}
 			else if(line[1]=='t'){
 				int ret = sscanf(line, "vt %f %f", &vt_unsorted[2*unsort_vt_it], &vt_unsorted[2*unsort_vt_it+1]);
@@ -200,7 +200,7 @@ bool load_obj(const char* file_name, float** vp, float** vt, float** vn, uint32_
 					printf("Observed format: %s\n", line);
 					return false;
 				}
-				unsort_vt_it+=1;
+				++unsort_vt_it;
 			}
 			else if(line[1]=='n'){
 				int ret = sscanf(line, "vn %f %f %f", &vn_unsorted[3*unsort_vn_it], &vn_unsorted[3*unsort_vn_it+1], &vn_unsorted[3*unsort_vn_it+2]);
@@ -210,7 +210,7 @@ bool load_obj(const char* file_name, float** vp, float** vt, float** vn, uint32_
 					printf("Observed format: %s\n", line);
 					return false;
 				}
-				unsort_vn_it+=1;
+				++unsort_vn_it;
 			}
 		}
 		else if(line[0]=='f'){
@@ -224,12 +224,12 @@ bool load_obj(const char* file_name, float** vp, float** vt, float** vn, uint32_
 					printf("Observed format: %s\n", line);
 					return false;
 				}
-				for(int i=0; i<3; i++){
-					indices[i]-=1; //wavefront obj doesn't use zero indexing
+				for(int i=0; i<3; ++i){
+					--indices[i]; //wavefront obj doesn't use zero indexing
 					(*vp)[3*vp_it  ] = vp_unsorted[3*indices[i]];   //x
 					(*vp)[3*vp_it+1] = vp_unsorted[3*indices[i]+1]; //y
 					(*vp)[3*vp_it+2] = vp_unsorted[3*indices[i]+2]; //z
-					vp_it+=1;
+					++vp_it;
 				}
 			}
 			else if(num_vts==0){ //vertex positions and normals
@@ -241,17 +241,17 @@ bool load_obj(const char* file_name, float** vp, float** vt, float** vn, uint32_
 					printf("Observed format: %s\n", line);
 					return false;
 				}
-				for(int i=0; i<3; i++){
-					indices[i]-=1; //wavefront obj doesn't use zero indexing
-					vn_index[i]-=1;
+				for(int i=0; i<3; ++i){
+					--indices[i]; //wavefront obj doesn't use zero indexing
+					--vn_index[i];
 					(*vp)[3*vp_it  ] = vp_unsorted[3*indices[i]  ]; //x
 					(*vp)[3*vp_it+1] = vp_unsorted[3*indices[i]+1]; //y
 					(*vp)[3*vp_it+2] = vp_unsorted[3*indices[i]+2]; //z
 					(*vn)[3*vn_it  ] = vn_unsorted[3*vn_index[i]  ];//x
 					(*vn)[3*vn_it+1] = vn_unsorted[3*vn_index[i]+1];//y
 					(*vn)[3*vn_it+2] = vn_unsorted[3*vn_index[i]+2];//z
-					vp_it+=1;
-					vn_it+=1;
+					++vp_it;
+					++vn_it;
 				}
 			}
 			else if(num_vns==0){ //vertex positions and tex coords
@@ -263,16 +263,16 @@ bool load_obj(const char* file_name, float** vp, float** vt, float** vn, uint32_
 					printf("Observed format: %s\n", line);
 					return false;
 				}
-				for(int i=0; i<3; i++){
-					indices[i]-=1; //wavefront obj doesn't use zero indexing
-					vt_index[i]-=1;
+				for(int i=0; i<3; ++i){
+					--indices[i]; //wavefront obj doesn't use zero indexing
+					--vt_index[i];
 					(*vp)[3*vp_it  ] = vp_unsorted[3*indices[i]  ]; //x
 					(*vp)[3*vp_it+1] = vp_unsorted[3*indices[i]+1]; //y
 					(*vp)[3*vp_it+2] = vp_unsorted[3*indices[i]+2]; //z
 					(*vt)[2*vt_it  ] = vt_unsorted[2*vt_index[i]  ];//u
 					(*vt)[2*vt_it+1] = vt_unsorted[2*vt_index[i]+1];//v
-					vp_it+=1;
-					vt_it+=1;
+					++vp_it;
+					++vt_it;
 				}
 			}
 			else{ //vertex positions and tex coords and normals
@@ -286,10 +286,10 @@ bool load_obj(const char* file_name, float** vp, float** vt, float** vn, uint32_
 					printf("Observed format: %s\n", line);
 					return false;
 				}
-				for(int i=0; i<3; i++){
-					indices[i]-=1; //wavefront obj doesn't use zero indexing
-					vt_index[i]-=1;
-					vn_index[i]-=1;
+				for(int i=0; i<3; ++i){
+					--indices[i]; //wavefront obj doesn't use zero indexing
+					--vt_index[i];
+					--vn_index[i];
 					(*vp)[3*vp_it  ] = vp_unsorted[3*indices[i] ];  //x
 					(*vp)[3*vp_it+1] = vp_unsorted[3*indices[i]+1]; //y
 					(*vp)[3*vp_it+2] = vp_unsorted[3*indices[i]+2]; //z
@@ -298,9 +298,9 @@ bool load_obj(const char* file_name, float** vp, float** vt, float** vn, uint32_
 					(*vn)[3*vn_it  ] = vn_unsorted[3*vn_index[i]  ]; //x
 					(*vn)[3*vn_it+1] = vn_unsorted[3*vn_index[i]+1]; //y
 					(*vn)[3*vn_it+2] = vn_unsorted[3*vn_index[i]+2]; //z
-					vp_it+=1;
-					vt_it+=1;
-					vn_it+=1;
+					++vp_it;
+					++vt_it;
+					++vn_it;
 				}
 			}
 		}
@@ -337,11 +337,11 @@ bool load_obj_indexed(const char* file_name, float** vp, uint16_t** indices, uin
 	//Count number of elements
 	while(fgets(line, OBJLOAD_LINE_SIZE, fp)){
 		if(line[0]=='v'){
-			if(line[1]==' ') num_vps++;
-			else if(line[1]=='t') num_vts++;
-			else if(line[1]=='n') num_vns++;
+			if(line[1]==' ') ++num_vps;
+			else if(line[1]=='t') ++num_vts;
+			else if(line[1]=='n') ++num_vns;
 		}
-		else if(line[0]=='f') num_faces++;
+		else if(line[0]=='f') ++num_faces;
 	}
 	rewind(fp);
 
@@ -376,7 +376,7 @@ bool load_obj_indexed(const char* file_name, float** vp, uint16_t** indices, uin
 					printf("Observed format: %s\n", line);
 					return false;
 				}
-				unsort_vp_it+=1;
+				++unsort_vp_it;
 			}
 		}
 		else if(line[0]=='f'){
@@ -417,9 +417,8 @@ bool load_obj_indexed(const char* file_name, float** vp, uint16_t** indices, uin
 					return false;
 				}
 			}
-			for(int i=0; i<3; i++){
-				(*indices)[index_it]--; //wavefront obj doesn't use zero indexing
-				index_it+=1;
+			for(int i=0; i<3; ++i){
+				--(*indices)[index_it++]; //wavefront obj doesn't use zero indexing
 			}
 		}//end elseif for 'f'
 	}//endwhile
@@ -451,11 +450,11 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 	//Count number of elements
 	while(fgets(line, OBJLOAD_LINE_SIZE, fp)){
 		if(line[0]=='v'){
-			if(line[1]==' ') num_vps++;
-			else if(line[1]=='t') num_vts++;
-			else if(line[1]=='n') num_vns++;
+			if(line[1]==' ') ++num_vps;
+			else if(line[1]=='t') ++num_vts;
+			else if(line[1]=='n') ++num_vns;
 		}
-		else if(line[0]=='f') num_faces++;
+		else if(line[0]=='f') ++num_faces;
 	}
 	rewind(fp);
 
@@ -505,7 +504,7 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 					printf("Observed format: %s\n", line);
 					return false;
 				}
-				unsort_vp_it+=1;
+				++unsort_vp_it;
 			}
 			else if(line[1]=='t'){
 				int ret = sscanf(line, "vt %f %f", &vt_unsorted[2*unsort_vt_it], &vt_unsorted[2*unsort_vt_it+1]);
@@ -515,7 +514,7 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 					printf("Observed format: %s\n", line);
 					return false;
 				}
-				unsort_vt_it+=1;
+				++unsort_vt_it;
 			}
 			else if(line[1]=='n'){
 				int ret = sscanf(line, "vn %f %f %f", &vn_unsorted[3*unsort_vn_it], &vn_unsorted[3*unsort_vn_it+1], &vn_unsorted[3*unsort_vn_it+2]);
@@ -525,7 +524,7 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 					printf("Observed format: %s\n", line);
 					return false;
 				}
-				unsort_vn_it+=1;
+				++unsort_vn_it;
 			}
 		}
 
@@ -540,13 +539,13 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 					return false;
 				}
 
-				for(int i=0; i<3; i++){
-					((*indices)[index_it])--; //wavefront doesn't use zero indexing
+				for(int i=0; i<3; ++i){
+					--(*indices)[index_it]; //wavefront doesn't use zero indexing
 					uint16_t curr_ind = (*indices)[index_it];
 					(*vp)[3*curr_ind]   = vp_unsorted[3*curr_ind];
 					(*vp)[3*curr_ind+1] = vp_unsorted[3*curr_ind+1];
 					(*vp)[3*curr_ind+2] = vp_unsorted[3*curr_ind+2];
-					index_it+=1;
+					++index_it;
 				}
 			}
 
@@ -560,9 +559,9 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 					return false;
 				}
 
-				for(int i=0; i<3; i++){ //add vn for the 3 verts in this face
-					index[i]-=1; //wavefront doesn't use zero indexing
-					vn_index[i]-=1;
+				for(int i=0; i<3; ++i){ //add vn for the 3 verts in this face
+					--index[i]; //wavefront doesn't use zero indexing
+					--vn_index[i];
 
 					(*indices)[index_it] = index[i];
 					uint16_t curr_ind = index[i];
@@ -609,9 +608,9 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 						assert(index_it<*index_count);
 						assert(index_it<(1<<16));
 						(*indices)[index_it] = vert_it;
-						vert_it+=1; //advance index
+						++vert_it; //advance index
 					}
-					index_it+=1;
+					++index_it;
 
 				}//end for i
 			}//end if num_vts
@@ -626,9 +625,9 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 					return false;
 				}
 
-				for(int i=0; i<3; i++){
-					index[i]--; //wavefront doesn't use zero indexing
-					vt_index[i]--;
+				for(int i=0; i<3; ++i){
+					--index[i]; //wavefront doesn't use zero indexing
+					--vt_index[i];
 					uint16_t curr_ind = index[i];
 					//Search index buffer for current vert, see if it already exists
 					// *** NB: O(n), yikes! Could try to improve, but the real solution is to use a saner file format 
@@ -664,9 +663,9 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 						assert(index_it<*index_count);
 						assert(index_it<(1<<16));
 						(*indices)[index_it] = vert_it;
-						vert_it+=1;
+						++vert_it;
 					}
-					index_it+=1;
+					++index_it;
 				}//end for i
 			}//end if num_vns
 
@@ -681,10 +680,10 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 					printf("Observed format: %s\n", line);
 					return false;
 				}
-				for(int i=0; i<3; i++){
-					index[i]--; //wavefront doesn't use zero indexing
-					vt_index[i]--;
-					vn_index[i]--;
+				for(int i=0; i<3; ++i){
+					--index[i]; //wavefront doesn't use zero indexing
+					--vt_index[i];
+					--vn_index[i];
 					uint16_t curr_ind = index[i];
 					//Search index buffer for current vert, see if it already exists
 					// *** NB: O(n), yikes! Could try to improve, but the real solution is to use a saner file format 
@@ -734,9 +733,9 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 						assert(index_it<*index_count);
 						assert(index_it<(1<<16));
 						(*indices)[index_it] = vert_it;
-						vert_it+=1; //advance index
+						++vert_it; //advance index
 					}
-					index_it+=1;
+					++index_it;
 				}//end for i
 			}//end else{ //positions, tex coords and normals
 

@@ -106,11 +106,11 @@ void poll_joystick(){
 
     //XBox layout is default, just copy values
     if(g_controller.controller_type == CONTROLLER_TYPE_XBOX){
-        for(int i=0; i<axis_count; i++){
+        for(int i=0; i<axis_count; ++i){
             g_controller.axis[i] = polled_axis_values[i];
         }
 
-        for(int i=0; i<button_count; i++){
+        for(int i=0; i<button_count; ++i){
             g_controller.button[i] = (bool)polled_button_values[i];
         }
     }
@@ -140,7 +140,7 @@ void poll_joystick(){
     }
 
     //Denoise analogue sticks
-    for(int i=0; i<4; i++){
+    for(int i=0; i<4; ++i){
         if(fabsf(g_controller.axis[i])<0.1) g_controller.axis[i] = 0;
     }
     
@@ -175,6 +175,6 @@ if(text) insert_text(text);
 /* //File/Path Drop
 //glfwSetDropCallback(window, drop_callback);
 void drop_callback(GLFWwindow* window, int count, const char** paths){
-    for(int i = 0;  i < count;  i++) handle_dropped_file(paths[i]);
+    for(int i = 0;  i < count;  ++i) handle_dropped_file(paths[i]);
 }
 */
