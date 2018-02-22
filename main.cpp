@@ -20,7 +20,6 @@ bool gl_fullscreen = false;
 #include "load_obj.h"
 #define DEBUG_DRAWING_IMPLEMENTATION
 #include "DebugDrawing.h"
-#undef DEBUG_DRAWING_IMPLEMENTATION
 
 #include "Input.cpp"
 #include "Camera3D.cpp"
