@@ -110,8 +110,11 @@ int main(){
 		free(indices);
 	}
 
-	init_camera(&g_camera, vec3{0,2,5}, vec3{0,0,0});
-	
+	Camera3D camera;
+	init_camera(&camera, vec3{0,2,5}, vec3{0,0,0});
+
+    if(cam_mouse_controls) glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+
 	Player player;
 	init_player(&player);
 	
@@ -201,7 +204,7 @@ int main(){
 			double sim_dt = MIN(sim_time, FIXED_TIME_STEP);
 			
 			//Move player
-			if(!freecam_mode) update_player(&player, g_camera, sim_dt);
+			if(!freecam_mode) update_player(&player, camera, sim_dt);
 			if(player.pos.y<0){
 				player.is_jumping = false;
 				player.is_on_ground = true;
@@ -213,7 +216,7 @@ int main(){
 			CameraMode cam_mode = CAM_MODE_FOLLOW_PLAYER;
 			if(freecam_mode) cam_mode = CAM_MODE_DEBUG;
 			
-			update_camera(&g_camera, cam_mode, player.pos, sim_dt);
+			update_camera(&camera, cam_mode, player.pos, sim_dt);
 
 			sim_time -= sim_dt;
 		}
@@ -221,8 +224,8 @@ int main(){
 		add_vec(&debug_draw_data, player.pos+vec3{0,0.75,0}, player.fwd);
 
 		glUseProgram(basic_shader.id);
-		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
-		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
+		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, camera.V.m);
+		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, camera.P.m);
 
 		//Draw player
 		glBindVertexArray(player_vao);
@@ -260,7 +263,7 @@ int main(){
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat.m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
 
-		debug_draw_flush(&debug_draw_data, g_camera);
+		debug_draw_flush(&debug_draw_data, camera);
 
 		glfwSwapBuffers(g_window);
 

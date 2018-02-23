@@ -7,8 +7,6 @@ const float far_plane = 300.0f;
 
 extern float gl_aspect_ratio;
 
-Camera3D g_camera;
-
 void init_camera(Camera3D* cam, vec3 cam_pos, vec3 target_pos){
     cam->pos = cam_pos;
     cam->V = look_at(cam_pos, target_pos, vec3{0,1,0});
@@ -89,4 +87,6 @@ void update_camera(Camera3D* cam, CameraMode cam_mode, vec3 player_pos, double d
 
     cam->V = translate(identity_mat4(), -cam->pos);
     cam->V = transpose(R)*cam->V;
+
+    cam->P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, near_plane, far_plane);
 }

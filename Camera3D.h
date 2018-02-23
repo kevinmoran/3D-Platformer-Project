@@ -12,7 +12,6 @@ struct Camera3D {
 	float move_speed, turn_speed;
 	mat4 V, P;
 };
-extern Camera3D g_camera;
 
 enum CameraMode {
     CAM_MODE_DEBUG,

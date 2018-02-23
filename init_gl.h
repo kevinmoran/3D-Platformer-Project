@@ -3,7 +3,6 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include "Input.h"
-#include "Camera3D.h"
 
 bool init_gl(GLFWwindow* &window, const char* title, int window_width, int window_height);
 void window_resize_callback(GLFWwindow* window, int width, int height);
@@ -45,8 +44,6 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 	glfwSetJoystickCallback(joystick_callback);
 	glfwSwapInterval(1);
 
-    if(cam_mouse_controls) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
-
 	init_joystick();
 
 	g_mouse.sensitivity = MOUSE_DEFAULT_SENSITIVITY;
@@ -79,7 +76,6 @@ void window_resize_callback(GLFWwindow* window, int width, int height){
     gl_width = width;
     gl_height = height;
     gl_aspect_ratio = (float)gl_width/gl_height;
-    g_camera.P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, near_plane, far_plane);
     int fb_w, fb_h;
 	glfwGetFramebufferSize(window, &fb_w, &fb_h);
 	glViewport(0, 0, fb_w, fb_h);
