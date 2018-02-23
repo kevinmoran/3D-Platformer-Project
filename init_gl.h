@@ -85,24 +85,10 @@ void window_resize_callback(GLFWwindow* window, int width, int height){
 	glViewport(0, 0, fb_w, fb_h);
 }
 
-//Custom assert function which pauses program in debugger instead of crashing
-//TODO put this somewhere sensible!
-#if defined(__clang__) || defined(__GNUC__)
-#define _BREAKPOINT_CALL __asm__ volatile("int $0x03")
-#elif defined(_MSC_VER_)
-#define _BREAKPOINT_CALL __debugbreak()
-#endif
-
-#define assert(exp) \
-{if(!(exp)) { \
-	printf("Assertion failed in %s, Line %d:\n%s\n...", __FILE__, __LINE__, #exp); \
-	_BREAKPOINT_CALL; \
-}} \
-
 //OpenGL Error checking (very limited but all you have for versions below 4.3)
 #define check_gl_error() _checkOglError(__FILE__, __LINE__)
 
-static int _checkOglError(const char *file, int line){
+int _checkOglError(const char *file, int line){
     GLenum glErr = glGetError();
     if(glErr != GL_NO_ERROR) {
         printf("glError in file %s @ line %d:\n%d - ", file, line, glErr);

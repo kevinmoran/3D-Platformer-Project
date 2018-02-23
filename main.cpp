@@ -5,11 +5,13 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
-GLFWwindow* g_window = NULL;
-int gl_width = 400;
-int gl_height = 300;
-float gl_aspect_ratio = (float)gl_width/gl_height;
-bool gl_fullscreen = false;
+#include "utils.h"
+
+global_variable GLFWwindow* g_window = NULL;
+global_variable int gl_width = 400;
+global_variable int gl_height = 300;
+global_variable float gl_aspect_ratio = (float)gl_width/gl_height;
+global_variable bool gl_fullscreen = false;
 
 #include "init_gl.h"
 #include "GameMaths.h"
