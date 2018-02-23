@@ -111,11 +111,12 @@ int main(){
 	}
 
 	init_camera(&g_camera, vec3{0,2,5}, vec3{0,0,0});
-
+	
 	Player player;
 	init_player(&player);
 	
-	init_debug_draw();
+	DebugDraw debug_draw_data;
+	init_debug_draw(&debug_draw_data);
 
     //Load shaders
 	Shader basic_shader = init_shader("MVP.vert", "uniform_colour_sunlight.frag");
@@ -217,7 +218,7 @@ int main(){
 			sim_time -= sim_dt;
 		}
 
-		draw_vec(player.pos+vec3{0,0.75,0}, player.fwd);
+		add_vec(&debug_draw_data, player.pos+vec3{0,0.75,0}, player.fwd);
 
 		glUseProgram(basic_shader.id);
 		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
@@ -258,6 +259,8 @@ int main(){
 		box_model_mat = translate(scale_mat4(vec3{5, 1, 5}), vec3{3, 0, -6});
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat.m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
+
+		debug_draw_flush(&debug_draw_data, g_camera);
 
 		glfwSwapBuffers(g_window);
 
