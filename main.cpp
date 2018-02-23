@@ -112,7 +112,8 @@ int main(){
 
 	init_camera(&g_camera, vec3{0,2,5}, vec3{0,0,0});
 
-	init_player(&g_player);
+	Player player;
+	init_player(&player);
 	
 	init_debug_draw();
 
@@ -122,7 +123,7 @@ int main(){
 
 	check_gl_error();
 
-    double curr_time = glfwGetTime(), prev_time, dt;
+    double curr_time = glfwGetTime();
 	//-------------------------------------------------------------------------------------//
 	//-------------------------------------MAIN LOOP---------------------------------------//
 	//-------------------------------------------------------------------------------------//
@@ -130,9 +131,9 @@ int main(){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Get dt
-		prev_time = curr_time;
+		double prev_time = curr_time;
 		curr_time = glfwGetTime();
-		dt = curr_time - prev_time;
+		double dt = curr_time - prev_time;
 		if(dt > 0.1) dt = 0.1;
 		
 		//Get Input
@@ -199,24 +200,24 @@ int main(){
 			double sim_dt = MIN(sim_time, FIXED_TIME_STEP);
 			
 			//Move player
-			if(!freecam_mode) update_player(&g_player, g_camera, sim_dt);
-			if(g_player.pos.y<0){
-				g_player.is_jumping = false;
-				g_player.is_on_ground = true;
-				g_player.pos.y = 0;
-				g_player.vel.y = 0;
+			if(!freecam_mode) update_player(&player, g_camera, sim_dt);
+			if(player.pos.y<0){
+				player.is_jumping = false;
+				player.is_on_ground = true;
+				player.pos.y = 0;
+				player.vel.y = 0;
 			}
 			
 			//Update camera
 			CameraMode cam_mode = CAM_MODE_FOLLOW_PLAYER;
 			if(freecam_mode) cam_mode = CAM_MODE_DEBUG;
 			
-			update_camera(&g_camera, cam_mode, g_player.pos, sim_dt);
+			update_camera(&g_camera, cam_mode, player.pos, sim_dt);
 
 			sim_time -= sim_dt;
 		}
 
-		draw_vec(g_player.pos+vec3{0,0.75,0}, g_player.fwd);
+		draw_vec(player.pos+vec3{0,0.75,0}, player.fwd);
 
 		glUseProgram(basic_shader.id);
 		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
@@ -224,8 +225,8 @@ int main(){
 
 		//Draw player
 		glBindVertexArray(player_vao);
-		glUniform4fv(colour_loc, 1, g_player.colour.v);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, g_player.M.m);
+		glUniform4fv(colour_loc, 1, player.colour.v);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player.M.m);
         glDrawElements(GL_TRIANGLES, player_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		//Draw ground

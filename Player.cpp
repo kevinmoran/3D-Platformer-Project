@@ -4,8 +4,6 @@
 #include "Camera3D.h"
 #include "Input.h"
 
-Player g_player;
-
 static float player_turn_speed = 720;
 static float player_max_stand_slope = 60;
 
