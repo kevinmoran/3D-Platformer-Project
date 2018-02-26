@@ -2,11 +2,10 @@
 
 size_t string_length(const char* s)
 {
-    size_t result = 0;
     const char* c = s;
-    while(*c++) ++result;
+    while(*c) ++c;
 
-    return result;
+    return c - s;
 }
 
 bool strings_are_equal(const char *s1, const char *s2)

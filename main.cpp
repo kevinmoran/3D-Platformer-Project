@@ -4,6 +4,7 @@
 
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "utils.h"
 
@@ -26,6 +27,7 @@ global_variable float gl_aspect_ratio = (float)gl_width/gl_height;
 #include "Player.cpp"
 #include "load_obj.cpp"
 #include "DebugDrawing.cpp"
+#include "string_functions.cpp"
 
 int main(){
 	GLFWwindow* window = NULL;
