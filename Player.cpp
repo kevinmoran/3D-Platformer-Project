@@ -31,7 +31,7 @@ void init_player(Player* player){
     player->colour = {0.1f, 0.8f, 0.3f, 1.0f};
 }
 
-void update_player(Player* player, const Camera3D &camera, double dt){
+void update_player(Player* player, GameInput &game_input, const Camera3D &camera, double dt){
 
     bool player_moved = false;
 
@@ -44,26 +44,26 @@ void update_player(Player* player, const Camera3D &camera, double dt){
 
         float decel_factor = 1.;
 
-        if(g_move_input[MOVE_FORWARD]) {
-            player_movement_dir += cam_fwd_xz_proj*g_move_input[MOVE_FORWARD];
+        if(game_input.move_input[MOVE_FORWARD]) {
+            player_movement_dir += cam_fwd_xz_proj*game_input.move_input[MOVE_FORWARD];
             player_moved = true;
         }
         else if(dot(player->vel, cam_fwd_xz_proj)>0.0001) player->vel -= cam_fwd_xz_proj*player_acc*decel_factor*dt;
 
-        if(g_move_input[MOVE_LEFT]) {
-            player_movement_dir += -cam_rgt_xz_proj*g_move_input[MOVE_LEFT];
+        if(game_input.move_input[MOVE_LEFT]) {
+            player_movement_dir += -cam_rgt_xz_proj*game_input.move_input[MOVE_LEFT];
             player_moved = true;
         }
         else if(dot(player->vel, -cam_rgt_xz_proj)>0.0001) player->vel += cam_rgt_xz_proj*player_acc*decel_factor*dt;
         
-        if(g_move_input[MOVE_BACK]) {
-            player_movement_dir += -cam_fwd_xz_proj*g_move_input[MOVE_BACK];
+        if(game_input.move_input[MOVE_BACK]) {
+            player_movement_dir += -cam_fwd_xz_proj*game_input.move_input[MOVE_BACK];
             player_moved = true;			
         }
         else if(dot(player->vel, -cam_fwd_xz_proj)>0.0001) player->vel += cam_fwd_xz_proj*player_acc*decel_factor*dt;
         
-        if(g_move_input[MOVE_RIGHT]) {
-            player_movement_dir += cam_rgt_xz_proj*g_move_input[MOVE_RIGHT];
+        if(game_input.move_input[MOVE_RIGHT]) {
+            player_movement_dir += cam_rgt_xz_proj*game_input.move_input[MOVE_RIGHT];
             player_moved = true;		
         }
         else if(dot(player->vel, cam_rgt_xz_proj)>0.0001) player->vel -= cam_rgt_xz_proj*player_acc*decel_factor*dt;      
@@ -104,7 +104,7 @@ void update_player(Player* player, const Camera3D &camera, double dt){
         if(!player_moved) player->vel *= friction_factor;
 
         static bool jump_button_was_pressed = false;
-        if(g_input[JUMP]){
+        if(game_input.button_input[JUMP]){
             if(!jump_button_was_pressed){
                 player->vel.y += jump_vel;
                 player->is_on_ground = false;
@@ -117,7 +117,7 @@ void update_player(Player* player, const Camera3D &camera, double dt){
     else { //Player is not on ground
         if(player->is_jumping){
             //If you don't hold jump you don't jump as high
-            if(!g_input[JUMP] && player->vel.y>0) player->vel.y += player_gravity*dt;
+            if(!game_input.button_input[JUMP] && player->vel.y>0) player->vel.y += player_gravity*dt;
         }
 
         //Clamp player's xz speed

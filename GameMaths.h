@@ -90,7 +90,7 @@ inline mat4 scale(mat4 m, float s);
 // camera functions
 inline mat4 look_at(vec3 cam_pos, vec3 target_pos, vec3 up);
 inline mat4 orthographic(float left, float right, float bottom, float top, float near_z, float far_z);
-inline mat4 perspective(float fovy, float aspect_ratio, float near_z, float far_z);
+inline mat4 perspective(float fov, float aspect_ratio, float near_z, float far_z);
 
 // quaternion functions
 inline versor quat_from_axis_rad(float radians, float x, float y, float z);
@@ -912,8 +912,8 @@ inline mat4 orthographic(float left, float right, float bottom, float top, float
 }
 
 // Returns a perspective projection matrix
-inline mat4 perspective(float fovy, float aspect_ratio, float near_z, float far_z) {
-	float fov_rad = DEG2RAD(fovy);
+inline mat4 perspective(float fov, float aspect_ratio, float near_z, float far_z) {
+	float fov_rad = DEG2RAD(fov/aspect_ratio);
 	float range = tanf(fov_rad / 2.0f) * near_z;
 	float sx = (2.0f * near_z) / (range * aspect_ratio + range * aspect_ratio);
 	float sy = near_z / range;

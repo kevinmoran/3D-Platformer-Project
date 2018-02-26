@@ -4,12 +4,9 @@
 #define NEAR_PLANE_Z 0.1f
 #define FAR_PLANE_Z 300.0f
 
-extern float gl_aspect_ratio;
-
 void init_camera(Camera3D* cam, vec3 cam_pos, vec3 target_pos){
     cam->pos = cam_pos;
     cam->V = look_at(cam_pos, target_pos, vec3{0,1,0});
-	cam->P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, NEAR_PLANE_Z, FAR_PLANE_Z);
 	cam->rgt = vec3{cam->V.m[0], cam->V.m[4], cam->V.m[8]};
 	cam->up  = vec3{cam->V.m[1], cam->V.m[5], cam->V.m[9]};
     cam->fwd = vec3{-cam->V.m[2], -cam->V.m[6], -cam->V.m[10]};
@@ -20,57 +17,54 @@ void init_camera(Camera3D* cam, vec3 cam_pos, vec3 target_pos){
 	cam->turn_speed = 100;
 }
 
-void init_camera(Camera3D* cam, vec3 cam_pos){
-    init_camera(cam, cam_pos, cam_pos + vec3{0,0,-1} );
-}
-
-void update_camera(Camera3D* cam, CameraMode cam_mode, vec3 player_pos, double dt)
+void update_camera(Camera3D* cam, CameraMode cam_mode, GameInput &game_input, vec3 player_pos, double dt)
 {
     if(cam_mode == CAM_MODE_DEBUG)
     {
         //WASD Movement (constrained to the x-z plane)
-        if(g_move_input[MOVE_FORWARD]) {
+        if(game_input.move_input[MOVE_FORWARD]) {
             vec3 xz_proj = normalise(vec3{cam->fwd.x, 0, cam->fwd.z});
             cam->pos += xz_proj*cam->move_speed*dt;
         }
-        if(g_move_input[MOVE_LEFT]) {
+        if(game_input.move_input[MOVE_LEFT]) {
             vec3 xz_proj = normalise(vec3{cam->rgt.x, 0, cam->rgt.z});
             cam->pos -= xz_proj*cam->move_speed*dt;
         }
-        if(g_move_input[MOVE_BACK]) {
+        if(game_input.move_input[MOVE_BACK]) {
             vec3 xz_proj = normalise(vec3{cam->fwd.x, 0, cam->fwd.z});
             cam->pos -= xz_proj*cam->move_speed*dt;			
         }
-        if(g_move_input[MOVE_RIGHT]) {
+        if(game_input.move_input[MOVE_RIGHT]) {
             vec3 xz_proj = normalise(vec3{cam->rgt.x, 0, cam->rgt.z});
             cam->pos += xz_proj*cam->move_speed*dt;			
         }
         //Increase/decrease elevation
-        if(g_input[RAISE_CAM]) {
+        if(game_input.button_input[RAISE_CAM]) {
             cam->pos.y += cam->move_speed*dt;			
         }
-        if(g_input[LOWER_CAM]) {
+        if(game_input.button_input[LOWER_CAM]) {
             cam->pos.y -= cam->move_speed*dt;			
         }
     }
     //Rotation
     if(!cam->use_mouse_controls){
-        if(g_move_input[TURN_CAM_LEFT]) {
-            cam->yaw += g_move_input[TURN_CAM_LEFT]*cam->turn_speed*dt;			
+        if(game_input.move_input[TURN_CAM_LEFT]) {
+            cam->yaw += game_input.move_input[TURN_CAM_LEFT]*cam->turn_speed*dt;			
         }
-        if(g_move_input[TURN_CAM_RIGHT]) {
-            cam->yaw -= g_move_input[TURN_CAM_RIGHT]*cam->turn_speed*dt;			
+        if(game_input.move_input[TURN_CAM_RIGHT]) {
+            cam->yaw -= game_input.move_input[TURN_CAM_RIGHT]*cam->turn_speed*dt;			
         }
-        if(g_move_input[TILT_CAM_UP]) {
-            cam->pitch += g_move_input[TILT_CAM_UP]*cam->turn_speed*dt;			
+        if(game_input.move_input[TILT_CAM_UP]) {
+            cam->pitch += game_input.move_input[TILT_CAM_UP]*cam->turn_speed*dt;			
         }
-        if(g_move_input[TILT_CAM_DOWN]) {
-            cam->pitch -= g_move_input[TILT_CAM_DOWN]*cam->turn_speed*dt;			
+        if(game_input.move_input[TILT_CAM_DOWN]) {
+            cam->pitch -= game_input.move_input[TILT_CAM_DOWN]*cam->turn_speed*dt;			
         }
     }
     else {
-        cam->yaw   += (g_mouse.prev_xpos-g_mouse.xpos) * g_mouse.sensitivity * cam->turn_speed*dt;
-        cam->pitch += (g_mouse.prev_ypos-g_mouse.ypos) * g_mouse.sensitivity * cam->turn_speed*dt;
+        Mouse* mouse = &game_input.mouse;
+        cam->yaw   += (mouse->prev_xpos - mouse->xpos) * mouse->sensitivity * cam->turn_speed*dt;
+        cam->pitch += (mouse->prev_ypos - mouse->ypos) * mouse->sensitivity * cam->turn_speed*dt;
     }
     while(cam->yaw >=360.f) cam->yaw -= 360.f;
     cam->pitch = CLAMP(cam->pitch, -85, 80);
@@ -86,6 +80,4 @@ void update_camera(Camera3D* cam, CameraMode cam_mode, vec3 player_pos, double d
 
     cam->V = translate(identity_mat4(), -cam->pos);
     cam->V = transpose(R)*cam->V;
-
-    cam->P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, NEAR_PLANE_Z, FAR_PLANE_Z);
 }

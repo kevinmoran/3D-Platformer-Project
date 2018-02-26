@@ -2,7 +2,7 @@
 //Kevin's Input Layer using GLFW 
 
 //List of all possible commands in the game!
-enum INPUT_MOVEMENT{
+enum MOVE_INPUT {
     MOVE_LEFT,
     MOVE_RIGHT,
     MOVE_FORWARD,
@@ -11,13 +11,13 @@ enum INPUT_MOVEMENT{
     TILT_CAM_UP,
     TURN_CAM_LEFT,
     TURN_CAM_RIGHT,
-    NUM_MOVEMENTS
+    NUM_MOVE_INPUTS
 };
-enum INPUT_COMMANDS{
+enum BUTTON_INPUT {
     JUMP,
     RAISE_CAM,
     LOWER_CAM,
-    NUM_INPUT_COMMANDS
+    NUM_BUTTON_INPUTS
 };
 
 const float MOUSE_DEFAULT_SENSITIVITY = 0.2f;
@@ -30,46 +30,6 @@ struct Mouse {
     float sensitivity;
     bool is_in_window;
 };
-extern Mouse g_mouse;
-
-//Global input state for game code to query, e.g.   if(g_input[MOVE_LEFT]) move_left();
-extern float g_move_input[NUM_MOVEMENTS];
-extern bool g_input[NUM_INPUT_COMMANDS];
-
-//For custom user key mappings (e.g.  g_key_mapping[DASH_MOVE] returns GLFW_KEY_ENTER)
-//extern int g_key_mapping[NUM_INPUT_COMMANDS];
-
-//Use Command instead of Control on Mac
-#ifdef __APPLE__
-#define CTRL_KEY_LEFT GLFW_KEY_LEFT_SUPER
-#define CTRL_KEY_RIGHT GLFW_KEY_RIGHT_SUPER
-#else
-#define CTRL_KEY_LEFT GLFW_KEY_LEFT_CONTROL
-#define CTRL_KEY_RIGHT GLFW_KEY_RIGHT_CONTROL
-#endif
-
-struct GLFWwindow;
-
-//glfwSetKeyCallback(window, key_callback);
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
-//Mouse stuff
-
-//glfwSetMouseButtonCallback(window, mouse_button_callback);
-//Or poll with: if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)))
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-
-//glfwSetCursorPosCallback(window, cursor_pos_callback);
-//Just poll with glfwGetCursorPos(window, &xpos, &ypos);
-void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos);
-
-//glfwSetScrollCallback(window, scroll_callback);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
-//glfwSetCursorEnterCallback(window, cursor_enter_callback);
-void cursor_enter_callback(GLFWwindow* window, int entered);
-
-//Joystick stuff
 
 enum XBOX_CONTROLLER_AXES {
     XBOX_LEFT_STICK_HOR,
@@ -141,28 +101,39 @@ struct ControllerState {
     bool is_connected;
     CONTROLLER_TYPE controller_type;
 };
-extern ControllerState g_controller;
 
-void init_joystick();
+struct GameInput {
+    Mouse mouse;
 
-void poll_joystick();
+    float move_input[NUM_MOVE_INPUTS];
+    bool button_input[NUM_BUTTON_INPUTS];
 
-//glfwSetJoystickCallback(joystick_callback);
-void joystick_callback(int joy, int event);
+    //For custom user key mappings (e.g.  g_key_mapping[DASH_MOVE] returns GLFW_KEY_ENTER)
+    //int key_mapping[NUM_BUTTON_INPUTS];
 
+    ControllerState controller;
+};
 
-//Clipboard Stuff
-/* //COPY
-glfwSetClipboardString(window, "A string with words in it");
+//Use Command instead of Control on Mac
+#ifdef __APPLE__
+#define CTRL_KEY_LEFT GLFW_KEY_LEFT_SUPER
+#define CTRL_KEY_RIGHT GLFW_KEY_RIGHT_SUPER
+#else
+#define CTRL_KEY_LEFT GLFW_KEY_LEFT_CONTROL
+#define CTRL_KEY_RIGHT GLFW_KEY_RIGHT_CONTROL
+#endif
 
-//PASTE
-const char* text = glfwGetClipboardString(window);
-if(text) insert_text(text);
-*/
+struct GLFWwindow;
+struct PlatformData;
 
-/* //File/Path Drop
-//glfwSetDropCallback(window, drop_callback);
-void drop_callback(GLFWwindow* window, int count, const char** paths){
-    for(int i = 0;  i < count;  ++i) handle_dropped_file(paths[i]);
-}
-*/
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+//Mouse callbacks
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void cursor_enter_callback(GLFWwindow* window, int entered);
+
+//Joystick functions
+void init_joystick(ControllerState* controller);
+void poll_joystick(PlatformData* platform_data);

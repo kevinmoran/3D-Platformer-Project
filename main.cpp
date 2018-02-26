@@ -8,10 +8,6 @@
 
 #include "utils.h"
 
-global_variable int gl_width = 400;
-global_variable int gl_height = 300;
-global_variable float gl_aspect_ratio = (float)gl_width/gl_height;
-
 #include "init_gl.h"
 #include "GameMaths.h"
 #include "Input.h"
@@ -31,9 +27,18 @@ global_variable float gl_aspect_ratio = (float)gl_width/gl_height;
 
 int main(){
 	GLFWwindow* window = NULL;
-	bool is_fullscreen = false;
+	WindowData window_data = {};
+	window_data.handle = &window;
+	window_data.width = 400;
+	window_data.height = 300;
+	window_data.aspect_ratio = (float)window_data.width/(float)window_data.height;
 
-	if(!init_gl(&window, "3D Platformer", gl_width, gl_height)){ return 1; }
+	GameInput game_input = {};
+	game_input.mouse.sensitivity = MOUSE_DEFAULT_SENSITIVITY;
+
+	PlatformData platform_data = {&window_data, &game_input};
+
+	if(!init_gl(&platform_data, "3D Platformer")){ return 1; }
 
 	//Load player mesh
 	GLuint player_vao;
@@ -142,10 +147,10 @@ int main(){
 		if(dt > 0.1) dt = 0.1;
 		
 		//Get Input
-		g_mouse.prev_xpos = g_mouse.xpos;
-    	g_mouse.prev_ypos = g_mouse.ypos;
+		game_input.mouse.prev_xpos = game_input.mouse.xpos;
+    	game_input.mouse.prev_ypos = game_input.mouse.ypos;
 		glfwPollEvents();
-		poll_joystick();
+		poll_joystick(platform_data.input);
 		
 		//Check miscellaneous button presses
 		static bool freecam_mode = false;
@@ -176,9 +181,9 @@ int main(){
 			if(glfwGetKey(window, GLFW_KEY_F)) {
 				if(!F_was_pressed){
 					if(glfwGetKey(window, CTRL_KEY_LEFT) || glfwGetKey(window, CTRL_KEY_RIGHT)){
-						is_fullscreen = !is_fullscreen;
+						window_data.is_fullscreen = !window_data.is_fullscreen;
 						static int old_win_x, old_win_y, old_win_w, old_win_h;
-						if(is_fullscreen){
+						if(window_data.is_fullscreen){
 							glfwGetWindowPos(window, &old_win_x, &old_win_y);
 							glfwGetWindowSize(window, &old_win_w, &old_win_h);
 							GLFWmonitor* mon = glfwGetPrimaryMonitor();
@@ -205,7 +210,7 @@ int main(){
 			double sim_dt = MIN(sim_time, FIXED_TIME_STEP);
 			
 			//Move player
-			if(!freecam_mode) update_player(&player, camera, sim_dt);
+			if(!freecam_mode) update_player(&player, game_input, camera, sim_dt);
 			if(player.pos.y<0){
 				player.is_jumping = false;
 				player.is_on_ground = true;
@@ -217,10 +222,12 @@ int main(){
 			CameraMode cam_mode = CAM_MODE_FOLLOW_PLAYER;
 			if(freecam_mode) cam_mode = CAM_MODE_DEBUG;
 			
-			update_camera(&camera, cam_mode, player.pos, sim_dt);
+			update_camera(&camera, cam_mode, game_input, player.pos, sim_dt);
 
 			sim_time -= sim_dt;
 		}
+
+		camera.P = perspective(90, window_data.aspect_ratio, NEAR_PLANE_Z, FAR_PLANE_Z);
 
 		add_vec(&debug_draw_data, player.pos+vec3{0,0.75,0}, player.fwd);
 

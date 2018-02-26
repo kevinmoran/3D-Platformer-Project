@@ -1,14 +1,15 @@
 #pragma once
-#include "gl_lite.h"
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+
+#include "gl_lite.h"
+#include "Platform.h"
 #include "Input.h"
 
-bool init_gl(GLFWwindow** window, const char* title, int window_width, int window_height);
 void window_resize_callback(GLFWwindow* window, int width, int height);
 
-bool init_gl(GLFWwindow** window, const char* title, int window_width, int window_height) {
-
+bool init_gl(PlatformData* platform_data, const char* title)
+{
 	/* start GL context and O/S window using the GLFW helper library */
 	if(!glfwInit()) {
 		fprintf(stderr, "Error: glfwInit failed\n");
@@ -23,7 +24,9 @@ bool init_gl(GLFWwindow** window, const char* title, int window_width, int windo
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	#endif
 
-	*window = glfwCreateWindow(window_width, window_height, title, NULL, NULL);
+	GLFWwindow** window = platform_data->window->handle;
+
+	*window = glfwCreateWindow(platform_data->window->width, platform_data->window->height, title, NULL, NULL);
 	if(!(*window)) {
 		fprintf(stderr, "Error: glfwCreateWindow failed\n");
 		glfwTerminate();
@@ -34,6 +37,8 @@ bool init_gl(GLFWwindow** window, const char* title, int window_width, int windo
 	printf("GLFW Version %s\n", glfw_version);
 	glfwMakeContextCurrent(*window);
 
+	glfwSetWindowUserPointer(*window, platform_data);
+
 	//Setup callbacks
 	glfwSetKeyCallback(*window, key_callback);
 	glfwSetWindowSizeCallback(*window, window_resize_callback);
@@ -41,12 +46,7 @@ bool init_gl(GLFWwindow** window, const char* title, int window_width, int windo
 	glfwSetCursorPosCallback(*window, cursor_pos_callback);
 	glfwSetScrollCallback(*window, scroll_callback);
 	glfwSetCursorEnterCallback(*window, cursor_enter_callback);
-	glfwSetJoystickCallback(joystick_callback);
 	glfwSwapInterval(1);
-
-	init_joystick();
-
-	g_mouse.sensitivity = MOUSE_DEFAULT_SENSITIVITY;
 
 	//Load OpenGL functions
 	if(!gl_lite_init()){
@@ -73,9 +73,13 @@ bool init_gl(GLFWwindow** window, const char* title, int window_width, int windo
 }
 
 void window_resize_callback(GLFWwindow* window, int width, int height){
-    gl_width = width;
-    gl_height = height;
-    gl_aspect_ratio = (float)gl_width/gl_height;
+	PlatformData* platform_data = (PlatformData*)glfwGetWindowUserPointer(window);
+	WindowData* win = platform_data->window;
+
+    win->width = width;
+    win->height = height;
+    win->aspect_ratio = (float)win->width/win->height;
+
     int fb_w, fb_h;
 	glfwGetFramebufferSize(window, &fb_w, &fb_h);
 	glViewport(0, 0, fb_w, fb_h);
