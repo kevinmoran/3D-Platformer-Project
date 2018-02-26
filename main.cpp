@@ -68,7 +68,7 @@ int main(){
 		GLuint index_vbo;
 		glGenBuffers(1, &index_vbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_vbo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, player_num_indices*sizeof(unsigned short), indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, player_num_indices*sizeof(uint16_t), indices, GL_STATIC_DRAW);
 		free(indices);
 	}
 
@@ -107,7 +107,7 @@ int main(){
 		GLuint index_vbo;
 		glGenBuffers(1, &index_vbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_vbo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_num_indices*sizeof(unsigned short), indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_num_indices*sizeof(uint16_t), indices, GL_STATIC_DRAW);
 		free(indices);
 	}
 
@@ -241,26 +241,20 @@ int main(){
 		//Draw some boxes
 		glUniform4fv(colour_loc, 1, vec4{0.2f, 0.1f, 0.8f, 1}.v);
 
-		mat4 box_model_mat;
-		box_model_mat = translate(scale_mat4(vec3{5, 1, 5}), vec3{-7, 0, -3});
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat.m);
-        glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
-		
-		box_model_mat = translate(scale_mat4(vec3{5, 1, 5}), vec3{11, 0, -4});
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat.m);
-        glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
+		#define NUM_BOXES 5
+		mat4 box_model_mat[NUM_BOXES] = 
+		{
+			translate(scale_mat4(vec3{5, 1, 5}), vec3{-7, 0, -3}),
+			translate(scale_mat4(vec3{5, 1, 5}), vec3{11, 0, -4}),
+			translate(scale_mat4(vec3{5, 10, 5}), vec3{0, 0, -11}),
+			translate(scale_mat4(vec3{5, 1, 5}), vec3{-5, 0, 4}),
+			translate(scale_mat4(vec3{5, 1, 5}), vec3{3, 0, -6})
+		};
 
-		box_model_mat = translate(scale_mat4(vec3{5, 10, 5}), vec3{0, 0, -11});
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat.m);
-        glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
-
-		box_model_mat = translate(scale_mat4(vec3{5, 1, 5}), vec3{-5, 0, 4});
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat.m);
-        glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
-
-		box_model_mat = translate(scale_mat4(vec3{5, 1, 5}), vec3{3, 0, -6});
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat.m);
-        glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
+		for(int32 i=0; i < NUM_BOXES; ++i){
+			glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat[i].m);
+			glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
+		}
 
 		debug_draw_flush(&debug_draw_data, camera);
 
