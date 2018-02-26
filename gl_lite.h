@@ -150,11 +150,18 @@ PAPAYA_GL_LIST_WIN32
 
 bool gl_lite_init();
 
+//OpenGL Error checking (very limited but all you have for versions below 4.3)
+#define check_gl_error() _checkOglError(__FILE__, __LINE__)
+
+int _checkOglError(const char *file, int line);
+
 #endif //GL_LITE_H
 
 // =============================================================================
 
 #ifdef GL_LITE_IMPLEMENTATION
+
+#include <stdio.h>
 
 #if defined(__APPLE__)
 bool gl_lite_init() {return true;} //Don't need to load function pointers
@@ -224,5 +231,22 @@ bool gl_lite_init()
 #endif
 
 #endif //__APPLE__
+
+//OpenGL Error checking (very limited but all you have for versions below 4.3)
+int _checkOglError(const char *file, int line){
+    GLenum glErr = glGetError();
+    if(glErr != GL_NO_ERROR) {
+        printf("glError in file %s @ line %d:\n%d - ", file, line, glErr);
+		switch(glErr) {
+			case GL_INVALID_OPERATION:				printf("INVALID_OPERATION\n");				return 1;
+			case GL_INVALID_ENUM:					printf("INVALID_ENUM\n");					return 1;
+			case GL_INVALID_VALUE:					printf("INVALID_VALUE\n");      			return 1;
+			case GL_OUT_OF_MEMORY:					printf("OUT_OF_MEMORY\n");      			return 1;
+			case GL_INVALID_FRAMEBUFFER_OPERATION:	printf("INVALID_FRAMEBUFFER_OPERATION\n");	return 1;
+			default:								printf("UNRECOGNISED ERROR\n");				return 1;
+        }
+    }
+    return 0;
+}
 
 #endif //GL_LITE_IMPLEMENTATION
