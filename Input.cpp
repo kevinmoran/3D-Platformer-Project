@@ -2,9 +2,9 @@
 
 #include <GLFW/glfw3.h>
 #include <stdio.h>
-#include <string.h>
 
 #include "GameMaths.h"
+#include "string_functions.h"
 
 Mouse g_mouse = {};
 
@@ -86,9 +86,9 @@ void init_joystick(){
     
     const char* joystick_name = glfwGetJoystickName(GLFW_JOYSTICK_1);
 
-    if(strcmp(joystick_name, "XBox 360 Controller")==0) 
+    if(strings_are_equal(joystick_name, "XBox 360 Controller")) 
         g_controller.controller_type = CONTROLLER_TYPE_XBOX;
-    else if(strcmp(joystick_name, "Wireless Controller")==0) 
+    else if(strings_are_equal(joystick_name, "Wireless Controller")) 
         g_controller.controller_type = CONTROLLER_TYPE_PS4;
     else {
         printf("Warning: Unknown joystick %s\n", joystick_name);

@@ -1,16 +1,15 @@
 #include "Shader.h"
 
 #include <stdio.h>
-#include <string.h> //strlen
 
 #include "utils.h"
+#include "string_functions.h"
 
 #define SHADERS_FOLDER "Shaders/"
 
 //Internal functions
 static bool _load_shader_program(Shader* shader, const char* vert_file, const char* frag_file);
 static bool _load_and_compile_shader(GLuint* handle, const char* filename, GLuint shader_type);
-static void _concat_strings(const char *string_a, size_t a_length, const char *string_b, size_t b_length, char *dest, size_t dest_length);
 
 Shader init_shader(const char* vert_file, const char* frag_file)
 {
@@ -105,7 +104,7 @@ static bool _load_and_compile_shader(GLuint* handle, const char* filename, GLuin
         shader_string[0] = '\0';
         const int FILENAME_BUFFER_LENGTH = 64;
         char full_file_path[FILENAME_BUFFER_LENGTH];
-        _concat_strings(SHADERS_FOLDER, strlen(SHADERS_FOLDER), filename, strlen(filename), full_file_path, FILENAME_BUFFER_LENGTH);
+        concat_strings(SHADERS_FOLDER, filename, full_file_path);
         
         FILE *fp = fopen(full_file_path, "rb");
         if(!fp){
@@ -144,17 +143,4 @@ static bool _load_and_compile_shader(GLuint* handle, const char* filename, GLuin
         }
     }
     return true;
-}
-
-static void _concat_strings(const char *string_a, size_t a_length, const char *string_b, size_t b_length, char *dest, size_t dest_length)
-{
-    assert((a_length + b_length) < dest_length);
-
-    for(int i = 0; i < a_length; ++i){
-        *dest++ = *string_a++;
-    }
-    for(int i = 0; i < b_length; ++i){
-        *dest++ = *string_b++;
-    }
-    *dest++ = 0;
 }
