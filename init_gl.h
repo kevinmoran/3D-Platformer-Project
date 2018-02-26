@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include "Input.h"
 
-bool init_gl(GLFWwindow* &window, const char* title, int window_width, int window_height);
+bool init_gl(GLFWwindow** window, const char* title, int window_width, int window_height);
 void window_resize_callback(GLFWwindow* window, int width, int height);
 
-bool init_gl(GLFWwindow* &window, const char* title, int window_width, int window_height) {
+bool init_gl(GLFWwindow** window, const char* title, int window_width, int window_height) {
 
 	/* start GL context and O/S window using the GLFW helper library */
 	if(!glfwInit()) {
@@ -23,8 +23,8 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	#endif
 
-	window = glfwCreateWindow(window_width, window_height, title, NULL, NULL);
-	if(!window) {
+	*window = glfwCreateWindow(window_width, window_height, title, NULL, NULL);
+	if(!(*window)) {
 		fprintf(stderr, "Error: glfwCreateWindow failed\n");
 		glfwTerminate();
 		getchar();
@@ -32,15 +32,15 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 	}
 	const char* glfw_version = glfwGetVersionString();
 	printf("GLFW Version %s\n", glfw_version);
-	glfwMakeContextCurrent(window);
+	glfwMakeContextCurrent(*window);
 
 	//Setup callbacks
-	glfwSetKeyCallback(window, key_callback);
-	glfwSetWindowSizeCallback(window, window_resize_callback);
-	glfwSetMouseButtonCallback(window, mouse_button_callback);
-	glfwSetCursorPosCallback(window, cursor_pos_callback);
-	glfwSetScrollCallback(window, scroll_callback);
-	glfwSetCursorEnterCallback(window, cursor_enter_callback);
+	glfwSetKeyCallback(*window, key_callback);
+	glfwSetWindowSizeCallback(*window, window_resize_callback);
+	glfwSetMouseButtonCallback(*window, mouse_button_callback);
+	glfwSetCursorPosCallback(*window, cursor_pos_callback);
+	glfwSetScrollCallback(*window, scroll_callback);
+	glfwSetCursorEnterCallback(*window, cursor_enter_callback);
 	glfwSetJoystickCallback(joystick_callback);
 	glfwSwapInterval(1);
 

@@ -7,11 +7,9 @@
 
 #include "utils.h"
 
-global_variable GLFWwindow* g_window = NULL;
 global_variable int gl_width = 400;
 global_variable int gl_height = 300;
 global_variable float gl_aspect_ratio = (float)gl_width/gl_height;
-global_variable bool gl_fullscreen = false;
 
 #include "init_gl.h"
 #include "GameMaths.h"
@@ -30,7 +28,10 @@ global_variable bool gl_fullscreen = false;
 #include "DebugDrawing.cpp"
 
 int main(){
-	if(!init_gl(g_window, "3D Platformer", gl_width, gl_height)){ return 1; }
+	GLFWwindow* window = NULL;
+	bool is_fullscreen = false;
+
+	if(!init_gl(&window, "3D Platformer", gl_width, gl_height)){ return 1; }
 
 	//Load player mesh
 	GLuint player_vao;
@@ -129,7 +130,7 @@ int main(){
 	//-------------------------------------------------------------------------------------//
 	//-------------------------------------MAIN LOOP---------------------------------------//
 	//-------------------------------------------------------------------------------------//
-	while(!glfwWindowShouldClose(g_window)) {
+	while(!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Get dt
@@ -147,13 +148,13 @@ int main(){
 		//Check miscellaneous button presses
 		static bool freecam_mode = false;
 		{
-			if(glfwGetKey(g_window, GLFW_KEY_ESCAPE)) {
-				glfwSetWindowShouldClose(g_window, 1);
+			if(glfwGetKey(window, GLFW_KEY_ESCAPE)) {
+				glfwSetWindowShouldClose(window, 1);
 			}
 
 			//Tab to toggle player_cam/freecam
 			static bool tab_was_pressed = false;
-			if(glfwGetKey(g_window, GLFW_KEY_TAB)) {
+			if(glfwGetKey(window, GLFW_KEY_TAB)) {
 				if(!tab_was_pressed) { freecam_mode = !freecam_mode; }
 				tab_was_pressed = true;
 			}
@@ -161,7 +162,7 @@ int main(){
 
 			//M to toggle between mouse/arrow key controls for camera
 			static bool m_was_pressed = false;
-			if(glfwGetKey(g_window, GLFW_KEY_M)) {
+			if(glfwGetKey(window, GLFW_KEY_M)) {
 				if(!m_was_pressed) { camera.use_mouse_controls = !camera.use_mouse_controls; }
 				m_was_pressed = true;
 			}
@@ -170,19 +171,19 @@ int main(){
 			//Ctrl/Command-F to toggle fullscreen
 			//Note: window_resize_callback takes care of resizing viewport/recalculating P matrix
 			static bool F_was_pressed = false;
-			if(glfwGetKey(g_window, GLFW_KEY_F)) {
+			if(glfwGetKey(window, GLFW_KEY_F)) {
 				if(!F_was_pressed){
-					if(glfwGetKey(g_window, CTRL_KEY_LEFT) || glfwGetKey(g_window, CTRL_KEY_RIGHT)){
-						gl_fullscreen = !gl_fullscreen;
+					if(glfwGetKey(window, CTRL_KEY_LEFT) || glfwGetKey(window, CTRL_KEY_RIGHT)){
+						is_fullscreen = !is_fullscreen;
 						static int old_win_x, old_win_y, old_win_w, old_win_h;
-						if(gl_fullscreen){
-							glfwGetWindowPos(g_window, &old_win_x, &old_win_y);
-							glfwGetWindowSize(g_window, &old_win_w, &old_win_h);
+						if(is_fullscreen){
+							glfwGetWindowPos(window, &old_win_x, &old_win_y);
+							glfwGetWindowSize(window, &old_win_w, &old_win_h);
 							GLFWmonitor* mon = glfwGetPrimaryMonitor();
 							const GLFWvidmode* vidMode = glfwGetVideoMode(mon);
-							glfwSetWindowMonitor(g_window, mon, 0, 0, vidMode->width, vidMode->height, vidMode->refreshRate);
+							glfwSetWindowMonitor(window, mon, 0, 0, vidMode->width, vidMode->height, vidMode->refreshRate);
 						}
-						else glfwSetWindowMonitor(g_window, NULL, old_win_x, old_win_y, old_win_w, old_win_h, GLFW_DONT_CARE);
+						else glfwSetWindowMonitor(window, NULL, old_win_x, old_win_y, old_win_w, old_win_h, GLFW_DONT_CARE);
 					}
 				}
 				F_was_pressed = true;
@@ -263,7 +264,7 @@ int main(){
 
 		debug_draw_flush(&debug_draw_data, camera);
 
-		glfwSwapBuffers(g_window);
+		glfwSwapBuffers(window);
 
 		check_gl_error();
 	}//end main loop
