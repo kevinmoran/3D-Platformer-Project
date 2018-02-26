@@ -110,10 +110,8 @@ int main(){
 		free(indices);
 	}
 
-	Camera3D camera;
+	Camera3D camera = {};
 	init_camera(&camera, vec3{0,2,5}, vec3{0,0,0});
-
-    if(cam_mouse_controls) glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 
 	Player player;
 	init_player(&player);
@@ -164,7 +162,7 @@ int main(){
 			//M to toggle between mouse/arrow key controls for camera
 			static bool m_was_pressed = false;
 			if(glfwGetKey(g_window, GLFW_KEY_M)) {
-				if(!m_was_pressed) { cam_mouse_controls = !cam_mouse_controls; }
+				if(!m_was_pressed) { camera.use_mouse_controls = !camera.use_mouse_controls; }
 				m_was_pressed = true;
 			}
 			else m_was_pressed = false;

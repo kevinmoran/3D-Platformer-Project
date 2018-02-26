@@ -1,16 +1,15 @@
 #include "Camera3D.h"
 #include "Input.h"
 
-bool cam_mouse_controls = false;
-const float near_plane = 0.1f;
-const float far_plane = 300.0f;
+#define NEAR_PLANE_Z 0.1f
+#define FAR_PLANE_Z 300.0f
 
 extern float gl_aspect_ratio;
 
 void init_camera(Camera3D* cam, vec3 cam_pos, vec3 target_pos){
     cam->pos = cam_pos;
     cam->V = look_at(cam_pos, target_pos, vec3{0,1,0});
-	cam->P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, near_plane, far_plane);
+	cam->P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, NEAR_PLANE_Z, FAR_PLANE_Z);
 	cam->rgt = vec3{cam->V.m[0], cam->V.m[4], cam->V.m[8]};
 	cam->up  = vec3{cam->V.m[1], cam->V.m[5], cam->V.m[9]};
     cam->fwd = vec3{-cam->V.m[2], -cam->V.m[6], -cam->V.m[10]};
@@ -55,7 +54,7 @@ void update_camera(Camera3D* cam, CameraMode cam_mode, vec3 player_pos, double d
         }
     }
     //Rotation
-    if(!cam_mouse_controls){
+    if(!cam->use_mouse_controls){
         if(g_move_input[TURN_CAM_LEFT]) {
             cam->yaw += g_move_input[TURN_CAM_LEFT]*cam->turn_speed*dt;			
         }
@@ -88,5 +87,5 @@ void update_camera(Camera3D* cam, CameraMode cam_mode, vec3 player_pos, double d
     cam->V = translate(identity_mat4(), -cam->pos);
     cam->V = transpose(R)*cam->V;
 
-    cam->P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, near_plane, far_plane);
+    cam->P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, NEAR_PLANE_Z, FAR_PLANE_Z);
 }

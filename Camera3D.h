@@ -1,16 +1,13 @@
 #pragma once
 #include "GameMaths.h"
 
-extern bool cam_mouse_controls;
-extern const float near_plane;
-extern const float far_plane;
-
 struct Camera3D {
     vec3 pos;
 	vec3 fwd, up, rgt;
 	float pitch, yaw;
 	float move_speed, turn_speed;
 	mat4 V, P;
+	bool use_mouse_controls;
 };
 
 enum CameraMode {
