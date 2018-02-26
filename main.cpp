@@ -20,7 +20,6 @@ global_variable bool gl_fullscreen = false;
 #include "Shader.h"
 #include "Player.h"
 #include "load_obj.h"
-#define DEBUG_DRAWING_IMPLEMENTATION
 #include "DebugDrawing.h"
 
 #include "Input.cpp"
@@ -28,6 +27,7 @@ global_variable bool gl_fullscreen = false;
 #include "Shader.cpp"
 #include "Player.cpp"
 #include "load_obj.cpp"
+#include "DebugDrawing.cpp"
 
 int main(){
 	if(!init_gl(g_window, "3D Platformer", gl_width, gl_height)){ return 1; }
