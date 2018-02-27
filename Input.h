@@ -201,7 +201,8 @@ enum PS4_BUTTONS {
     PS4_BUTTON_DPAD_UP,
     PS4_BUTTON_DPAD_RIGHT,
     PS4_BUTTON_DPAD_DOWN,
-    PS4_BUTTON_DPAD_LEFT
+    PS4_BUTTON_DPAD_LEFT,
+    PS4_CONTROLLER_NUM_BUTTONS
 };
 
 enum CONTROLLER_TYPE {
@@ -211,10 +212,10 @@ enum CONTROLLER_TYPE {
 };
 
 struct ControllerState {
+    CONTROLLER_TYPE type;
+    bool is_initialised;
     float axis[XBOX_CONTROLLER_NUM_AXES];
     bool button[XBOX_CONTROLLER_NUM_BUTTONS];
-    bool is_connected;
-    CONTROLLER_TYPE controller_type;
 };
 
 struct RawInput {

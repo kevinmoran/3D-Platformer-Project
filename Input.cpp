@@ -168,29 +168,29 @@ void cursor_enter_callback(GLFWwindow* window, int entered){
 
 void init_joystick(ControllerState* controller)
 {
-    controller->is_connected = true;
+    controller->is_initialised = true;
     
     const char* joystick_name = glfwGetJoystickName(GLFW_JOYSTICK_1);
 
     if(strings_are_equal(joystick_name, "XBox 360 Controller")) 
-        controller->controller_type = CONTROLLER_TYPE_XBOX;
+        controller->type = CONTROLLER_TYPE_XBOX;
     else if(strings_are_equal(joystick_name, "Wireless Controller")) 
-        controller->controller_type = CONTROLLER_TYPE_PS4;
+        controller->type = CONTROLLER_TYPE_PS4;
     else { 
-        controller->controller_type = CONTROLLER_TYPE_UNKNOWN;
+        controller->type = CONTROLLER_TYPE_UNKNOWN;
         printf("Warning: Unknown joystick %s\n", joystick_name);
-        return;
     }
 }
 
 void poll_joystick(RawInput* input)
 {
+    ControllerState* controller = &input->controller;
     if(!glfwJoystickPresent(GLFW_JOYSTICK_1)){
-        input->controller.is_connected = false;        
+        controller = {};        
         return;
     }
 
-    if(!input->controller.is_connected) 
+    if(!controller->is_initialised) 
         init_joystick(&input->controller);
 
     int axis_count;
@@ -199,63 +199,68 @@ void poll_joystick(RawInput* input)
     const unsigned char* polled_button_values = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &button_count);
 
     //XBox layout is default, just copy values
-    if(input->controller.controller_type == CONTROLLER_TYPE_XBOX)
+    if(controller->type == CONTROLLER_TYPE_XBOX)
     {
         for(int i=0; i<axis_count; ++i){
-            input->controller.axis[i] = polled_axis_values[i];
+            controller->axis[i] = polled_axis_values[i];
         }
 
         for(int i=0; i<button_count; ++i){
-            input->controller.button[i] = (bool)polled_button_values[i];
+            controller->button[i] = (bool)polled_button_values[i];
         }
     }
     //Convert PS4 input to XBox input
-    else if(input->controller.controller_type == CONTROLLER_TYPE_PS4)
+    else if(controller->type == CONTROLLER_TYPE_PS4)
     {
-        input->controller.axis[XBOX_LEFT_STICK_HOR]   = polled_axis_values[PS4_LEFT_STICK_HOR];
-        input->controller.axis[XBOX_LEFT_STICK_VERT]  = -polled_axis_values[PS4_LEFT_STICK_VERT];
-        input->controller.axis[XBOX_RIGHT_STICK_HOR]  = polled_axis_values[PS4_RIGHT_STICK_HOR];
-        input->controller.axis[XBOX_RIGHT_STICK_VERT] = -polled_axis_values[PS4_RIGHT_STICK_VERT];
-        input->controller.axis[XBOX_LT]               = polled_axis_values[PS4_L2];
-        input->controller.axis[XBOX_RT]               = polled_axis_values[PS4_R2];
+        controller->axis[XBOX_LEFT_STICK_HOR]   = polled_axis_values[PS4_LEFT_STICK_HOR];
+        controller->axis[XBOX_LEFT_STICK_VERT]  = -polled_axis_values[PS4_LEFT_STICK_VERT];
+        controller->axis[XBOX_RIGHT_STICK_HOR]  = polled_axis_values[PS4_RIGHT_STICK_HOR];
+        controller->axis[XBOX_RIGHT_STICK_VERT] = -polled_axis_values[PS4_RIGHT_STICK_VERT];
+        controller->axis[XBOX_LT]               = polled_axis_values[PS4_L2];
+        controller->axis[XBOX_RT]               = polled_axis_values[PS4_R2];
 
-        input->controller.button[XBOX_BUTTON_A]          = polled_button_values[PS4_BUTTON_CROSS];
-        input->controller.button[XBOX_BUTTON_B]          = polled_button_values[PS4_BUTTON_CIRCLE];
-        input->controller.button[XBOX_BUTTON_X]          = polled_button_values[PS4_BUTTON_SQUARE];
-        input->controller.button[XBOX_BUTTON_Y]          = polled_button_values[PS4_BUTTON_TRIANGLE];
-        input->controller.button[XBOX_BUTTON_LB]         = polled_button_values[PS4_BUTTON_L1];
-        input->controller.button[XBOX_BUTTON_RB]         = polled_button_values[PS4_BUTTON_R1];
-        input->controller.button[XBOX_BUTTON_BACK]       = polled_button_values[PS4_BUTTON_SHARE];
-        input->controller.button[XBOX_BUTTON_START]      = polled_button_values[PS4_BUTTON_OPTIONS];
-        input->controller.button[XBOX_BUTTON_LS]         = polled_button_values[PS4_BUTTON_L3];
-        input->controller.button[XBOX_BUTTON_RS]         = polled_button_values[PS4_BUTTON_R3];
-        input->controller.button[XBOX_BUTTON_DPAD_UP]    = polled_button_values[PS4_BUTTON_DPAD_UP];
-        input->controller.button[XBOX_BUTTON_DPAD_RIGHT] = polled_button_values[PS4_BUTTON_DPAD_RIGHT];
-        input->controller.button[XBOX_BUTTON_DPAD_DOWN]  = polled_button_values[PS4_BUTTON_DPAD_DOWN];
-        input->controller.button[XBOX_BUTTON_DPAD_LEFT]  = polled_button_values[PS4_BUTTON_DPAD_LEFT];
+        controller->button[XBOX_BUTTON_A]          = polled_button_values[PS4_BUTTON_CROSS];
+        controller->button[XBOX_BUTTON_B]          = polled_button_values[PS4_BUTTON_CIRCLE];
+        controller->button[XBOX_BUTTON_X]          = polled_button_values[PS4_BUTTON_SQUARE];
+        controller->button[XBOX_BUTTON_Y]          = polled_button_values[PS4_BUTTON_TRIANGLE];
+        controller->button[XBOX_BUTTON_LB]         = polled_button_values[PS4_BUTTON_L1];
+        controller->button[XBOX_BUTTON_RB]         = polled_button_values[PS4_BUTTON_R1];
+        controller->button[XBOX_BUTTON_BACK]       = polled_button_values[PS4_BUTTON_SHARE];
+        controller->button[XBOX_BUTTON_START]      = polled_button_values[PS4_BUTTON_OPTIONS];
+        controller->button[XBOX_BUTTON_LS]         = polled_button_values[PS4_BUTTON_L3];
+        controller->button[XBOX_BUTTON_RS]         = polled_button_values[PS4_BUTTON_R3];
+        controller->button[XBOX_BUTTON_DPAD_UP]    = polled_button_values[PS4_BUTTON_DPAD_UP];
+        controller->button[XBOX_BUTTON_DPAD_RIGHT] = polled_button_values[PS4_BUTTON_DPAD_RIGHT];
+        controller->button[XBOX_BUTTON_DPAD_DOWN]  = polled_button_values[PS4_BUTTON_DPAD_DOWN];
+        controller->button[XBOX_BUTTON_DPAD_LEFT]  = polled_button_values[PS4_BUTTON_DPAD_LEFT];
     }  
 }
 
 void process_raw_input(RawInput* raw_input, GameInput* game_input)
 {
-    //Denoise analogue sticks
-    for(int i=0; i<4; ++i){
-        if(fabsf(raw_input->controller.axis[i])<0.1) raw_input->controller.axis[i] = 0;
+    ControllerState* controller = &raw_input->controller;
+
+    // TODO: Clever way of deciding whether to prioritise controller or keyboard
+    if(controller->is_initialised)
+    {
+        //Denoise analogue sticks
+        for(int i=0; i<4; ++i){
+            if(fabsf(controller->axis[i])<0.1) controller->axis[i] = 0;
+        }
+        
+        game_input->move_input[MOVE_FORWARD]   = CLAMP( controller->axis[XBOX_LEFT_STICK_VERT], 0, 1);
+        game_input->move_input[MOVE_LEFT]      = CLAMP(-controller->axis[XBOX_LEFT_STICK_HOR], 0, 1);
+        game_input->move_input[MOVE_BACK]      = CLAMP(-controller->axis[XBOX_LEFT_STICK_VERT], 0, 1);
+        game_input->move_input[MOVE_RIGHT]     = CLAMP( controller->axis[XBOX_LEFT_STICK_HOR], 0, 1);
+        game_input->move_input[TILT_CAM_UP]    = CLAMP( controller->axis[XBOX_RIGHT_STICK_VERT], 0, 1);
+        game_input->move_input[TILT_CAM_DOWN]  = CLAMP(-controller->axis[XBOX_RIGHT_STICK_VERT], 0, 1);
+        game_input->move_input[TURN_CAM_LEFT]  = CLAMP(-controller->axis[XBOX_RIGHT_STICK_HOR], 0, 1);
+        game_input->move_input[TURN_CAM_RIGHT] = CLAMP( controller->axis[XBOX_RIGHT_STICK_HOR], 0, 1);
+        game_input->button_input[JUMP]         = controller->button[XBOX_BUTTON_A];
+        game_input->button_input[RAISE_CAM]    = controller->button[XBOX_BUTTON_RB];
+        game_input->button_input[LOWER_CAM]    = controller->button[XBOX_BUTTON_LB];
     }
     
-    // TODO: Clever way of deciding whether to prioritise controller or keyboard
-    game_input->move_input[MOVE_FORWARD]   = CLAMP( raw_input->controller.axis[XBOX_LEFT_STICK_VERT], 0, 1);
-    game_input->move_input[MOVE_LEFT]      = CLAMP(-raw_input->controller.axis[XBOX_LEFT_STICK_HOR], 0, 1);
-    game_input->move_input[MOVE_BACK]      = CLAMP(-raw_input->controller.axis[XBOX_LEFT_STICK_VERT], 0, 1);
-    game_input->move_input[MOVE_RIGHT]     = CLAMP( raw_input->controller.axis[XBOX_LEFT_STICK_HOR], 0, 1);
-    game_input->move_input[TILT_CAM_UP]    = CLAMP( raw_input->controller.axis[XBOX_RIGHT_STICK_VERT], 0, 1);
-    game_input->move_input[TILT_CAM_DOWN]  = CLAMP(-raw_input->controller.axis[XBOX_RIGHT_STICK_VERT], 0, 1);
-    game_input->move_input[TURN_CAM_LEFT]  = CLAMP(-raw_input->controller.axis[XBOX_RIGHT_STICK_HOR], 0, 1);
-    game_input->move_input[TURN_CAM_RIGHT] = CLAMP( raw_input->controller.axis[XBOX_RIGHT_STICK_HOR], 0, 1);
-    game_input->button_input[JUMP]         = raw_input->controller.button[XBOX_BUTTON_A];
-    game_input->button_input[RAISE_CAM]    = raw_input->controller.button[XBOX_BUTTON_RB];
-    game_input->button_input[LOWER_CAM]    = raw_input->controller.button[XBOX_BUTTON_LB];
-
     game_input->move_input[MOVE_FORWARD]   = raw_input->keyboard_input[KEY_W];
     game_input->move_input[MOVE_LEFT]      = raw_input->keyboard_input[KEY_A];
     game_input->move_input[MOVE_BACK]      = raw_input->keyboard_input[KEY_S];
