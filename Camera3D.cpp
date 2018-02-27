@@ -17,7 +17,7 @@ void init_camera(Camera3D* cam, vec3 cam_pos, vec3 target_pos){
 	cam->turn_speed = 100;
 }
 
-void update_camera(Camera3D* cam, CameraMode cam_mode, GameInput &game_input, vec3 player_pos, double dt)
+void update_camera(Camera3D* cam, CameraMode cam_mode, GameInput &game_input, Mouse &mouse, vec3 player_pos, double dt)
 {
     if(cam_mode == CAM_MODE_DEBUG)
     {
@@ -62,9 +62,8 @@ void update_camera(Camera3D* cam, CameraMode cam_mode, GameInput &game_input, ve
         }
     }
     else {
-        Mouse* mouse = &game_input.mouse;
-        cam->yaw   += (mouse->prev_xpos - mouse->xpos) * mouse->sensitivity * cam->turn_speed*dt;
-        cam->pitch += (mouse->prev_ypos - mouse->ypos) * mouse->sensitivity * cam->turn_speed*dt;
+        cam->yaw   += (mouse.prev_xpos - mouse.xpos) * mouse.sensitivity * cam->turn_speed*dt;
+        cam->pitch += (mouse.prev_ypos - mouse.ypos) * mouse.sensitivity * cam->turn_speed*dt;
     }
     while(cam->yaw >=360.f) cam->yaw -= 360.f;
     cam->pitch = CLAMP(cam->pitch, -85, 80);

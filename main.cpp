@@ -34,9 +34,10 @@ int main(){
 	window_data.aspect_ratio = (float)window_data.width/(float)window_data.height;
 
 	GameInput game_input = {};
-	game_input.mouse.sensitivity = MOUSE_DEFAULT_SENSITIVITY;
+	RawInput raw_input = {};
+	raw_input.mouse.sensitivity = MOUSE_DEFAULT_SENSITIVITY;
 
-	PlatformData platform_data = {&window_data, &game_input};
+	PlatformData platform_data = {&window_data, &raw_input};
 
 	if(!init_gl(&platform_data, "3D Platformer")){ return 1; }
 
@@ -147,10 +148,11 @@ int main(){
 		if(dt > 0.1) dt = 0.1;
 		
 		//Get Input
-		game_input.mouse.prev_xpos = game_input.mouse.xpos;
-    	game_input.mouse.prev_ypos = game_input.mouse.ypos;
+		raw_input.mouse.prev_xpos = raw_input.mouse.xpos;
+    	raw_input.mouse.prev_ypos = raw_input.mouse.ypos;
 		glfwPollEvents();
 		poll_joystick(platform_data.input);
+		process_raw_input(&raw_input, &game_input);
 		
 		//Check miscellaneous button presses
 		static bool freecam_mode = false;
@@ -176,7 +178,7 @@ int main(){
 			else m_was_pressed = false;
 
 			//Ctrl/Command-F to toggle fullscreen
-			//Note: window_resize_callback takes care of resizing viewport/recalculating P matrix
+			//Note: window_resize_callback takes care of resizing viewport
 			static bool F_was_pressed = false;
 			if(glfwGetKey(window, GLFW_KEY_F)) {
 				if(!F_was_pressed){
@@ -222,7 +224,7 @@ int main(){
 			CameraMode cam_mode = CAM_MODE_FOLLOW_PLAYER;
 			if(freecam_mode) cam_mode = CAM_MODE_DEBUG;
 			
-			update_camera(&camera, cam_mode, game_input, player.pos, sim_dt);
+			update_camera(&camera, cam_mode, game_input, raw_input.mouse, player.pos, sim_dt);
 
 			sim_time -= sim_dt;
 		}

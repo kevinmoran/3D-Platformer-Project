@@ -1,7 +1,7 @@
 #pragma once
 
 struct GLFWwindow;
-struct GameInput;
+struct RawInput;
 
 struct WindowData
 {
@@ -15,5 +15,5 @@ struct WindowData
 struct PlatformData
 {
 	WindowData* window;
-	GameInput* input;
+	RawInput* input;
 };

@@ -20,6 +20,120 @@ enum BUTTON_INPUT {
     NUM_BUTTON_INPUTS
 };
 
+enum KEYBOARD_KEYS {
+    KEY_UNKNOWN = 0,
+    KEY_SPACE,
+    KEY_APOSTROPHE,
+    KEY_COMMA,
+    KEY_MINUS,
+    KEY_PERIOD,
+    KEY_SLASH,
+    KEY_0,
+    KEY_1,
+    KEY_2,
+    KEY_3,
+    KEY_4,
+    KEY_5,
+    KEY_6,
+    KEY_7,
+    KEY_8,
+    KEY_9,
+    KEY_SEMICOLON,
+    KEY_EQUAL,
+    KEY_A,
+    KEY_B,
+    KEY_C,
+    KEY_D,
+    KEY_E,
+    KEY_F,
+    KEY_G,
+    KEY_H,
+    KEY_I,
+    KEY_J,
+    KEY_K,
+    KEY_L,
+    KEY_M,
+    KEY_N,
+    KEY_O,
+    KEY_P,
+    KEY_Q,
+    KEY_R,
+    KEY_S,
+    KEY_T,
+    KEY_U,
+    KEY_V,
+    KEY_W,
+    KEY_X,
+    KEY_Y,
+    KEY_Z,
+    KEY_LEFT_BRACKET, // [
+    KEY_BACKSLASH,
+    KEY_RIGHT_BRACKET, // ]
+    KEY_GRAVE_ACCENT, // `
+    KEY_WORLD_1,
+    KEY_WORLD_2,
+
+    /* Function keys */
+    KEY_ESCAPE, 
+    KEY_ENTER, 
+    KEY_TAB, 
+    KEY_BACKSPACE, 
+    KEY_INSERT, 
+    KEY_DELETE, 
+    KEY_RIGHT, 
+    KEY_LEFT, 
+    KEY_DOWN, 
+    KEY_UP, 
+    KEY_PAGE_UP, 
+    KEY_PAGE_DOWN, 
+    KEY_HOME, 
+    KEY_END, 
+    KEY_CAPS_LOCK, 
+    KEY_SCROLL_LOCK, 
+    KEY_NUM_LOCK, 
+    KEY_PRINT_SCREEN, 
+    KEY_PAUSE, 
+    KEY_F1, 
+    KEY_F2, 
+    KEY_F3, 
+    KEY_F4, 
+    KEY_F5, 
+    KEY_F6, 
+    KEY_F7, 
+    KEY_F8, 
+    KEY_F9, 
+    KEY_F10, 
+    KEY_F11, 
+    KEY_F12,
+    KEY_NUMPAD_0, 
+    KEY_NUMPAD_1, 
+    KEY_NUMPAD_2, 
+    KEY_NUMPAD_3, 
+    KEY_NUMPAD_4, 
+    KEY_NUMPAD_5, 
+    KEY_NUMPAD_6, 
+    KEY_NUMPAD_7, 
+    KEY_NUMPAD_8, 
+    KEY_NUMPAD_9, 
+    KEY_NUMPAD_DECIMAL, 
+    KEY_NUMPAD_DIVIDE, 
+    KEY_NUMPAD_MULTIPLY, 
+    KEY_NUMPAD_SUBTRACT, 
+    KEY_NUMPAD_ADD, 
+    KEY_NUMPAD_ENTER, 
+    KEY_NUMPAD_EQUAL, 
+    KEY_LEFT_SHIFT, 
+    KEY_LEFT_CONTROL, 
+    KEY_LEFT_ALT, 
+    KEY_LEFT_SUPER, 
+    KEY_RIGHT_SHIFT, 
+    KEY_RIGHT_CONTROL, 
+    KEY_RIGHT_ALT, 
+    KEY_RIGHT_SUPER, 
+    KEY_MENU, 
+    KEYBOARD_NUM_KEYS
+};
+
 const float MOUSE_DEFAULT_SENSITIVITY = 0.2f;
 struct Mouse {
     bool click_left;
@@ -41,7 +155,7 @@ enum XBOX_CONTROLLER_AXES {
     XBOX_CONTROLLER_NUM_AXES
 };
 
-enum XBOX_polled_button_values {
+enum XBOX_BUTTONS {
     XBOX_BUTTON_A,
     XBOX_BUTTON_B,
     XBOX_BUTTON_X,
@@ -69,7 +183,7 @@ enum PS4_CONTROLLER_AXES {
     PS4_NUM_CONTROLLER_AXES
 };
 
-enum PS4_polled_button_values {
+enum PS4_BUTTONS {
     PS4_BUTTON_SQUARE,
     PS4_BUTTON_CROSS,
     PS4_BUTTON_CIRCLE,
@@ -91,6 +205,7 @@ enum PS4_polled_button_values {
 };
 
 enum CONTROLLER_TYPE {
+    CONTROLLER_TYPE_UNKNOWN,
     CONTROLLER_TYPE_XBOX,
     CONTROLLER_TYPE_PS4
 };
@@ -102,16 +217,15 @@ struct ControllerState {
     CONTROLLER_TYPE controller_type;
 };
 
-struct GameInput {
+struct RawInput {
     Mouse mouse;
+    bool keyboard_input[KEYBOARD_NUM_KEYS];
+    ControllerState controller;
+};
 
+struct GameInput {
     float move_input[NUM_MOVE_INPUTS];
     bool button_input[NUM_BUTTON_INPUTS];
-
-    //For custom user key mappings (e.g.  g_key_mapping[DASH_MOVE] returns GLFW_KEY_ENTER)
-    //int key_mapping[NUM_BUTTON_INPUTS];
-
-    ControllerState controller;
 };
 
 //Use Command instead of Control on Mac
@@ -137,3 +251,5 @@ void cursor_enter_callback(GLFWwindow* window, int entered);
 //Joystick functions
 void init_joystick(ControllerState* controller);
 void poll_joystick(PlatformData* platform_data);
+
+void process_raw_input(RawInput* raw_input, GameInput* game_input);
