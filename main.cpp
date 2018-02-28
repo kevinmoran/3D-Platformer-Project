@@ -245,34 +245,20 @@ int main(){
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//Timer for updating game simulation with fixed time step
-		static double sim_time = 0;
-		const double FIXED_TIME_STEP = 1.0/240;
-		sim_time += dt;
-		
-		//Simulation
-		while(sim_time>0){
-			// Note: Because once per frame we simulate with dt < fixed time step, the game 
-			// will not be 100% deterministic. Use a different method if that matters!
-			double sim_dt = MIN(sim_time, FIXED_TIME_STEP);
-			
-			//Move player
-			if(!freecam_mode) update_player(&player, game_input, camera, sim_dt);
-			if(player.pos.y<0){
-				player.is_jumping = false;
-				player.is_on_ground = true;
-				player.pos.y = 0;
-				player.vel.y = 0;
-			}
-			
-			//Update camera
-			CameraMode cam_mode = CAM_MODE_FOLLOW_PLAYER;
-			if(freecam_mode) cam_mode = CAM_MODE_DEBUG;
-			
-			update_camera(&camera, cam_mode, game_input, player.pos, sim_dt);
-
-			sim_time -= sim_dt;
+		//Move player
+		if(!freecam_mode) update_player(&player, game_input, camera, dt);
+		if(player.pos.y<0){
+			player.is_jumping = false;
+			player.is_on_ground = true;
+			player.pos.y = 0;
+			player.vel.y = 0;
 		}
+		
+		//Update camera
+		CameraMode cam_mode = CAM_MODE_FOLLOW_PLAYER;
+		if(freecam_mode) cam_mode = CAM_MODE_DEBUG;
+		
+		update_camera(&camera, cam_mode, game_input, player.pos, dt);
 
 		camera.P = perspective(90, window_data.aspect_ratio, NEAR_PLANE_Z, FAR_PLANE_Z);
 
