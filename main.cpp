@@ -33,11 +33,9 @@ int main(){
 	window_data.height = 300;
 	window_data.aspect_ratio = (float)window_data.width/(float)window_data.height;
 
-	GameInput game_input = {};
-	RawInput raw_input = {};
-	raw_input.mouse.sensitivity = MOUSE_DEFAULT_SENSITIVITY;
+	RawInput raw_input[2] = {};
 
-	PlatformData platform_data = {&window_data, &raw_input};
+	PlatformData platform_data = {&window_data, &raw_input[0], &raw_input[1]};
 
 	if(!init_gl(&platform_data, "3D Platformer")){ return 1; }
 
@@ -121,6 +119,7 @@ int main(){
 
 	Camera3D camera = {};
 	init_camera(&camera, vec3{0,2,5}, vec3{0,0,0});
+	bool freecam_mode = false;
 
 	Player player;
 	init_player(&player);
@@ -138,9 +137,8 @@ int main(){
 	//-------------------------------------------------------------------------------------//
 	//-------------------------------------MAIN LOOP---------------------------------------//
 	//-------------------------------------------------------------------------------------//
-	while(!glfwWindowShouldClose(window)) {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	while(!glfwWindowShouldClose(window))
+	{
 		//Get dt
 		double prev_time = curr_time;
 		curr_time = glfwGetTime();
@@ -148,57 +146,104 @@ int main(){
 		if(dt > 0.1) dt = 0.1;
 		
 		//Get Input
-		raw_input.mouse.prev_xpos = raw_input.mouse.xpos;
-    	raw_input.mouse.prev_ypos = raw_input.mouse.ypos;
+		copy_memory(platform_data.old_input, platform_data.new_input, sizeof(RawInput));
 		glfwPollEvents();
-		poll_joystick(platform_data.input);
-		process_raw_input(&raw_input, &game_input);
+
+		RawInput* new_input = platform_data.new_input;
+		RawInput* old_input = platform_data.old_input;
 		
 		//Check miscellaneous button presses
-		static bool freecam_mode = false;
 		{
-			if(glfwGetKey(window, GLFW_KEY_ESCAPE)) {
+			if(new_input->keyboard_input[KEY_ESCAPE]) {
 				glfwSetWindowShouldClose(window, 1);
 			}
 
 			//Tab to toggle player_cam/freecam
-			static bool tab_was_pressed = false;
-			if(glfwGetKey(window, GLFW_KEY_TAB)) {
-				if(!tab_was_pressed) { freecam_mode = !freecam_mode; }
-				tab_was_pressed = true;
+			if(new_input->keyboard_input[KEY_TAB] && !old_input->keyboard_input[KEY_TAB]) {
+				freecam_mode = !freecam_mode;
 			}
-			else tab_was_pressed = false;
 
 			//M to toggle between mouse/arrow key controls for camera
-			static bool m_was_pressed = false;
-			if(glfwGetKey(window, GLFW_KEY_M)) {
-				if(!m_was_pressed) { camera.use_mouse_controls = !camera.use_mouse_controls; }
-				m_was_pressed = true;
+			if(new_input->keyboard_input[KEY_M] && !old_input->keyboard_input[KEY_M]) {
+				camera.use_mouse_controls = !camera.use_mouse_controls;
 			}
-			else m_was_pressed = false;
 
 			//Ctrl/Command-F to toggle fullscreen
 			//Note: window_resize_callback takes care of resizing viewport
-			static bool F_was_pressed = false;
-			if(glfwGetKey(window, GLFW_KEY_F)) {
-				if(!F_was_pressed){
-					if(glfwGetKey(window, CTRL_KEY_LEFT) || glfwGetKey(window, CTRL_KEY_RIGHT)){
-						window_data.is_fullscreen = !window_data.is_fullscreen;
-						static int old_win_x, old_win_y, old_win_w, old_win_h;
-						if(window_data.is_fullscreen){
-							glfwGetWindowPos(window, &old_win_x, &old_win_y);
-							glfwGetWindowSize(window, &old_win_w, &old_win_h);
-							GLFWmonitor* mon = glfwGetPrimaryMonitor();
-							const GLFWvidmode* vidMode = glfwGetVideoMode(mon);
-							glfwSetWindowMonitor(window, mon, 0, 0, vidMode->width, vidMode->height, vidMode->refreshRate);
-						}
-						else glfwSetWindowMonitor(window, NULL, old_win_x, old_win_y, old_win_w, old_win_h, GLFW_DONT_CARE);
+			if(new_input->keyboard_input[KEY_F] && !old_input->keyboard_input[KEY_F])
+			{
+				//TODO: Handle Control/Command switcheroo with RawInput
+				if(glfwGetKey(window, CTRL_KEY_LEFT) || glfwGetKey(window, CTRL_KEY_RIGHT))
+				{
+					window_data.is_fullscreen = !window_data.is_fullscreen;
+					static int old_win_x, old_win_y, old_win_w, old_win_h;
+					if(window_data.is_fullscreen)
+					{
+						glfwGetWindowPos(window, &old_win_x, &old_win_y);
+						glfwGetWindowSize(window, &old_win_w, &old_win_h);
+						GLFWmonitor* mon = glfwGetPrimaryMonitor();
+						const GLFWvidmode* vidMode = glfwGetVideoMode(mon);
+						glfwSetWindowMonitor(window, mon, 0, 0, vidMode->width, vidMode->height, vidMode->refreshRate);
 					}
+					else glfwSetWindowMonitor(window, NULL, old_win_x, old_win_y, old_win_w, old_win_h, GLFW_DONT_CARE);
 				}
-				F_was_pressed = true;
 			}
-			else F_was_pressed = false;
 		}
+
+		GameInput game_input = {};
+		//Process raw input
+		{
+			ControllerState* controller = &new_input->controller;
+
+			// TODO: Clever way of deciding whether to prioritise controller or keyboard
+			if(controller->is_initialised)
+			{
+				//Denoise analogue sticks
+				for(int i=0; i<4; ++i){
+					if(fabsf(controller->axis[i])<0.1) controller->axis[i] = 0;
+				}
+				
+				game_input.move_input[MOVE_FORWARD]   = CLAMP( controller->axis[XBOX_LEFT_STICK_VERT], 0, 1);
+				game_input.move_input[MOVE_LEFT]      = CLAMP(-controller->axis[XBOX_LEFT_STICK_HOR], 0, 1);
+				game_input.move_input[MOVE_BACK]      = CLAMP(-controller->axis[XBOX_LEFT_STICK_VERT], 0, 1);
+				game_input.move_input[MOVE_RIGHT]     = CLAMP( controller->axis[XBOX_LEFT_STICK_HOR], 0, 1);
+				game_input.move_input[TILT_CAM_UP]    = CLAMP( controller->axis[XBOX_RIGHT_STICK_VERT], 0, 1);
+				game_input.move_input[TILT_CAM_DOWN]  = CLAMP(-controller->axis[XBOX_RIGHT_STICK_VERT], 0, 1);
+				game_input.move_input[TURN_CAM_LEFT]  = CLAMP(-controller->axis[XBOX_RIGHT_STICK_HOR], 0, 1);
+				game_input.move_input[TURN_CAM_RIGHT] = CLAMP( controller->axis[XBOX_RIGHT_STICK_HOR], 0, 1);
+				game_input.button_input[JUMP]         = controller->button[XBOX_BUTTON_A];
+				game_input.button_input[RAISE_CAM]    = controller->button[XBOX_BUTTON_RB];
+				game_input.button_input[LOWER_CAM]    = controller->button[XBOX_BUTTON_LB];
+			}
+			
+			game_input.move_input[MOVE_FORWARD] = new_input->keyboard_input[KEY_W];
+			game_input.move_input[MOVE_LEFT]    = new_input->keyboard_input[KEY_A];
+			game_input.move_input[MOVE_BACK]    = new_input->keyboard_input[KEY_S];
+			game_input.move_input[MOVE_RIGHT]   = new_input->keyboard_input[KEY_D];
+
+			if(!camera.use_mouse_controls)
+			{
+				game_input.move_input[TILT_CAM_UP]    = new_input->keyboard_input[KEY_UP];
+				game_input.move_input[TILT_CAM_DOWN]  = new_input->keyboard_input[KEY_DOWN];
+				game_input.move_input[TURN_CAM_LEFT]  = new_input->keyboard_input[KEY_LEFT];
+				game_input.move_input[TURN_CAM_RIGHT] = new_input->keyboard_input[KEY_RIGHT];
+			}
+			else {
+				float mouse_dx = new_input->mouse.xpos - old_input->mouse.xpos;
+				float mouse_dy = new_input->mouse.ypos - old_input->mouse.ypos;
+				const float MOUSE_DEFAULT_SENSITIVITY = 0.5f;
+				game_input.move_input[TILT_CAM_UP]    = MAX( mouse_dy * MOUSE_DEFAULT_SENSITIVITY, 0);
+				game_input.move_input[TILT_CAM_DOWN]  = MAX(-mouse_dy * MOUSE_DEFAULT_SENSITIVITY, 0);
+				game_input.move_input[TURN_CAM_LEFT]  = MAX( mouse_dx * MOUSE_DEFAULT_SENSITIVITY, 0);
+				game_input.move_input[TURN_CAM_RIGHT] = MAX(-mouse_dx * MOUSE_DEFAULT_SENSITIVITY, 0);
+			}
+
+			game_input.button_input[JUMP]      = new_input->keyboard_input[KEY_SPACE];
+			game_input.button_input[RAISE_CAM] = new_input->keyboard_input[KEY_E];
+			game_input.button_input[LOWER_CAM] = new_input->keyboard_input[KEY_Q];
+		}
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Timer for updating game simulation with fixed time step
 		static double sim_time = 0;
@@ -224,7 +269,7 @@ int main(){
 			CameraMode cam_mode = CAM_MODE_FOLLOW_PLAYER;
 			if(freecam_mode) cam_mode = CAM_MODE_DEBUG;
 			
-			update_camera(&camera, cam_mode, game_input, raw_input.mouse, player.pos, sim_dt);
+			update_camera(&camera, cam_mode, game_input, player.pos, sim_dt);
 
 			sim_time -= sim_dt;
 		}

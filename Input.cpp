@@ -10,7 +10,7 @@
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	PlatformData* platform_data = (PlatformData*)glfwGetWindowUserPointer(window);
-    RawInput* input = platform_data->input;
+    RawInput* input = platform_data->new_input;
 
     //Immutable input keys:
     bool is_pressed = (action != GLFW_RELEASE);
@@ -131,7 +131,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	PlatformData* platform_data = (PlatformData*)glfwGetWindowUserPointer(window);
-    RawInput* input = platform_data->input;
+    RawInput* input = platform_data->new_input;
 
     bool is_pressed = (action != GLFW_RELEASE);
     switch(button){
@@ -143,7 +143,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos){
 	PlatformData* platform_data = (PlatformData*)glfwGetWindowUserPointer(window);
-    RawInput* input = platform_data->input;
+    RawInput* input = platform_data->new_input;
 
     input->mouse.xpos = xpos;
     input->mouse.ypos = ypos;
@@ -151,7 +151,7 @@ void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos){
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
 	PlatformData* platform_data = (PlatformData*)glfwGetWindowUserPointer(window);
-    RawInput* input = platform_data->input;
+    RawInput* input = platform_data->new_input;
 
     input->mouse.xscroll = xoffset;
     input->mouse.yscroll = yoffset;
@@ -159,7 +159,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
 
 void cursor_enter_callback(GLFWwindow* window, int entered){
 	PlatformData* platform_data = (PlatformData*)glfwGetWindowUserPointer(window);
-    RawInput* input = platform_data->input;
+    RawInput* input = platform_data->new_input;
 
     input->mouse.is_in_window = entered;
 }
@@ -234,42 +234,4 @@ void poll_joystick(RawInput* input)
         controller->button[XBOX_BUTTON_DPAD_DOWN]  = polled_button_values[PS4_BUTTON_DPAD_DOWN];
         controller->button[XBOX_BUTTON_DPAD_LEFT]  = polled_button_values[PS4_BUTTON_DPAD_LEFT];
     }  
-}
-
-void process_raw_input(RawInput* raw_input, GameInput* game_input)
-{
-    ControllerState* controller = &raw_input->controller;
-
-    // TODO: Clever way of deciding whether to prioritise controller or keyboard
-    if(controller->is_initialised)
-    {
-        //Denoise analogue sticks
-        for(int i=0; i<4; ++i){
-            if(fabsf(controller->axis[i])<0.1) controller->axis[i] = 0;
-        }
-        
-        game_input->move_input[MOVE_FORWARD]   = CLAMP( controller->axis[XBOX_LEFT_STICK_VERT], 0, 1);
-        game_input->move_input[MOVE_LEFT]      = CLAMP(-controller->axis[XBOX_LEFT_STICK_HOR], 0, 1);
-        game_input->move_input[MOVE_BACK]      = CLAMP(-controller->axis[XBOX_LEFT_STICK_VERT], 0, 1);
-        game_input->move_input[MOVE_RIGHT]     = CLAMP( controller->axis[XBOX_LEFT_STICK_HOR], 0, 1);
-        game_input->move_input[TILT_CAM_UP]    = CLAMP( controller->axis[XBOX_RIGHT_STICK_VERT], 0, 1);
-        game_input->move_input[TILT_CAM_DOWN]  = CLAMP(-controller->axis[XBOX_RIGHT_STICK_VERT], 0, 1);
-        game_input->move_input[TURN_CAM_LEFT]  = CLAMP(-controller->axis[XBOX_RIGHT_STICK_HOR], 0, 1);
-        game_input->move_input[TURN_CAM_RIGHT] = CLAMP( controller->axis[XBOX_RIGHT_STICK_HOR], 0, 1);
-        game_input->button_input[JUMP]         = controller->button[XBOX_BUTTON_A];
-        game_input->button_input[RAISE_CAM]    = controller->button[XBOX_BUTTON_RB];
-        game_input->button_input[LOWER_CAM]    = controller->button[XBOX_BUTTON_LB];
-    }
-    
-    game_input->move_input[MOVE_FORWARD]   = raw_input->keyboard_input[KEY_W];
-    game_input->move_input[MOVE_LEFT]      = raw_input->keyboard_input[KEY_A];
-    game_input->move_input[MOVE_BACK]      = raw_input->keyboard_input[KEY_S];
-    game_input->move_input[MOVE_RIGHT]     = raw_input->keyboard_input[KEY_D];
-    game_input->move_input[TILT_CAM_UP]    = raw_input->keyboard_input[KEY_UP];
-    game_input->move_input[TILT_CAM_DOWN]  = raw_input->keyboard_input[KEY_DOWN];
-    game_input->move_input[TURN_CAM_LEFT]  = raw_input->keyboard_input[KEY_LEFT];
-    game_input->move_input[TURN_CAM_RIGHT] = raw_input->keyboard_input[KEY_RIGHT];
-    game_input->button_input[JUMP]         = raw_input->keyboard_input[KEY_SPACE];
-    game_input->button_input[RAISE_CAM]    = raw_input->keyboard_input[KEY_E];
-    game_input->button_input[LOWER_CAM]    = raw_input->keyboard_input[KEY_Q];
 }

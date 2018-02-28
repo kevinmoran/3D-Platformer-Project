@@ -15,5 +15,6 @@ struct WindowData
 struct PlatformData
 {
 	WindowData* window;
-	RawInput* input;
+	RawInput* new_input;
+	RawInput* old_input;
 };

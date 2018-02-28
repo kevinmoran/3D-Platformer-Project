@@ -17,7 +17,7 @@ void init_camera(Camera3D* cam, vec3 cam_pos, vec3 target_pos){
 	cam->turn_speed = 100;
 }
 
-void update_camera(Camera3D* cam, CameraMode cam_mode, GameInput &game_input, Mouse &mouse, vec3 player_pos, double dt)
+void update_camera(Camera3D* cam, CameraMode cam_mode, GameInput &game_input, vec3 player_pos, double dt)
 {
     if(cam_mode == CAM_MODE_DEBUG)
     {
@@ -47,25 +47,22 @@ void update_camera(Camera3D* cam, CameraMode cam_mode, GameInput &game_input, Mo
         }
     }
     //Rotation
-    if(!cam->use_mouse_controls){
-        if(game_input.move_input[TURN_CAM_LEFT]) {
-            cam->yaw += game_input.move_input[TURN_CAM_LEFT]*cam->turn_speed*dt;			
-        }
-        if(game_input.move_input[TURN_CAM_RIGHT]) {
-            cam->yaw -= game_input.move_input[TURN_CAM_RIGHT]*cam->turn_speed*dt;			
-        }
-        if(game_input.move_input[TILT_CAM_UP]) {
-            cam->pitch += game_input.move_input[TILT_CAM_UP]*cam->turn_speed*dt;			
-        }
-        if(game_input.move_input[TILT_CAM_DOWN]) {
-            cam->pitch -= game_input.move_input[TILT_CAM_DOWN]*cam->turn_speed*dt;			
-        }
+    if(game_input.move_input[TURN_CAM_LEFT]) {
+        cam->yaw += game_input.move_input[TURN_CAM_LEFT]*cam->turn_speed*dt;			
     }
-    else {
-        cam->yaw   += (mouse.prev_xpos - mouse.xpos) * mouse.sensitivity * cam->turn_speed*dt;
-        cam->pitch += (mouse.prev_ypos - mouse.ypos) * mouse.sensitivity * cam->turn_speed*dt;
+    if(game_input.move_input[TURN_CAM_RIGHT]) {
+        cam->yaw -= game_input.move_input[TURN_CAM_RIGHT]*cam->turn_speed*dt;			
     }
-    while(cam->yaw >=360.f) cam->yaw -= 360.f;
+    if(game_input.move_input[TILT_CAM_UP]) {
+        cam->pitch += game_input.move_input[TILT_CAM_UP]*cam->turn_speed*dt;			
+    }
+    if(game_input.move_input[TILT_CAM_DOWN]) {
+        cam->pitch -= game_input.move_input[TILT_CAM_DOWN]*cam->turn_speed*dt;			
+    }
+
+    while(cam->yaw >=360.f) 
+        cam->yaw -= 360.f;
+
     cam->pitch = CLAMP(cam->pitch, -85, 80);
 
     //Update matrices

@@ -39,3 +39,12 @@ typedef double f64;
 	printf("Assertion failed in %s, Line %d:\n%s\n...", __FILE__, __LINE__, #exp); \
 	_BREAKPOINT_CALL; \
 }}
+
+void copy_memory(void *dest, void *src, size_t n)
+{
+   uint8* src_bytes = (uint8*)src;
+   uint8* dest_bytes = (uint8*)dest;
+ 
+   for (uint32 i = 0; i < n; ++i)
+       dest_bytes[i] = src_bytes[i];
+}

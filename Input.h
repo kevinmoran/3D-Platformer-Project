@@ -134,14 +134,11 @@ enum KEYBOARD_KEYS {
     KEYBOARD_NUM_KEYS
 };
 
-const float MOUSE_DEFAULT_SENSITIVITY = 0.2f;
 struct Mouse {
     bool click_left;
     bool click_right;
     double xpos, ypos;
-    double prev_xpos, prev_ypos;
     double xscroll, yscroll;
-    float sensitivity;
     bool is_in_window;
 };
 
@@ -252,5 +249,3 @@ void cursor_enter_callback(GLFWwindow* window, int entered);
 //Joystick functions
 void init_joystick(ControllerState* controller);
 void poll_joystick(PlatformData* platform_data);
-
-void process_raw_input(RawInput* raw_input, GameInput* game_input);
