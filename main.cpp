@@ -149,8 +149,23 @@ int main(){
 		copy_memory(platform_data.old_input, platform_data.new_input, sizeof(RawInput));
 		glfwPollEvents();
 
+		{
+			vec2 new_mouse_pos = {(f32)platform_data.new_input->mouse.xpos, (f32)platform_data.new_input->mouse.ypos};
+			vec2 old_mouse_pos = {(f32)platform_data.old_input->mouse.xpos, (f32)platform_data.old_input->mouse.ypos};
+
+			//TODO: this threshold is completely ad-hoc, check it
+			const float MOUSE_MOVED_INTENTIONALLY_THRESHOLD = 25.0f;
+			if(length2(new_mouse_pos - old_mouse_pos) > MOUSE_MOVED_INTENTIONALLY_THRESHOLD) 
+				platform_data.new_input->use_controller = false;
+		}
+
+		poll_joystick(platform_data.new_input);
+
 		RawInput* new_input = platform_data.new_input;
 		RawInput* old_input = platform_data.old_input;
+
+		if(new_input->use_controller != old_input->use_controller)
+			printf(new_input->use_controller ? "Use Controller\n" : "Don't Use Controller\n");
 		
 		//Check miscellaneous button presses
 		{
@@ -196,8 +211,7 @@ int main(){
 			ControllerState* controller = &new_input->controller;
 			ControllerState* old_controller = &old_input->controller;
 
-			// TODO: Clever way of deciding whether to prioritise controller or keyboard
-			if(controller->is_initialised)
+			if(new_input->use_controller)
 			{
 				//Denoise analogue sticks
 				for(int i=0; i<4; ++i){
@@ -219,42 +233,45 @@ int main(){
 				game_input.was_down[RAISE_CAM]        = old_controller->button[XBOX_BUTTON_RB];
 				game_input.was_down[LOWER_CAM]        = old_controller->button[XBOX_BUTTON_LB];
 			}
-			
-			game_input.move_input[MOVE_FORWARD] = new_input->keyboard_input[KEY_W];
-			game_input.move_input[MOVE_LEFT]    = new_input->keyboard_input[KEY_A];
-			game_input.move_input[MOVE_BACK]    = new_input->keyboard_input[KEY_S];
-			game_input.move_input[MOVE_RIGHT]   = new_input->keyboard_input[KEY_D];
-
-			if(!camera.use_mouse_controls)
+			else //use mouse and keyboard
 			{
-				game_input.move_input[TILT_CAM_UP]    = new_input->keyboard_input[KEY_UP];
-				game_input.move_input[TILT_CAM_DOWN]  = new_input->keyboard_input[KEY_DOWN];
-				game_input.move_input[TURN_CAM_LEFT]  = new_input->keyboard_input[KEY_LEFT];
-				game_input.move_input[TURN_CAM_RIGHT] = new_input->keyboard_input[KEY_RIGHT];
-			}
-			else {
-				float mouse_dx = new_input->mouse.xpos - old_input->mouse.xpos;
-				float mouse_dy = new_input->mouse.ypos - old_input->mouse.ypos;
-				const float MOUSE_DEFAULT_SENSITIVITY = 0.5f;
-				game_input.move_input[TILT_CAM_UP]    = MAX( mouse_dy * MOUSE_DEFAULT_SENSITIVITY, 0);
-				game_input.move_input[TILT_CAM_DOWN]  = MAX(-mouse_dy * MOUSE_DEFAULT_SENSITIVITY, 0);
-				game_input.move_input[TURN_CAM_LEFT]  = MAX( mouse_dx * MOUSE_DEFAULT_SENSITIVITY, 0);
-				game_input.move_input[TURN_CAM_RIGHT] = MAX(-mouse_dx * MOUSE_DEFAULT_SENSITIVITY, 0);
-			}
+				game_input.move_input[MOVE_FORWARD] = new_input->keyboard_input[KEY_W];
+				game_input.move_input[MOVE_LEFT]    = new_input->keyboard_input[KEY_A];
+				game_input.move_input[MOVE_BACK]    = new_input->keyboard_input[KEY_S];
+				game_input.move_input[MOVE_RIGHT]   = new_input->keyboard_input[KEY_D];
 
-			game_input.is_down[JUMP]       = new_input->keyboard_input[KEY_SPACE];
-			game_input.is_down[RAISE_CAM]  = new_input->keyboard_input[KEY_E];
-			game_input.is_down[LOWER_CAM]  = new_input->keyboard_input[KEY_Q];
-			game_input.was_down[JUMP]      = old_input->keyboard_input[KEY_SPACE];
-			game_input.was_down[RAISE_CAM] = old_input->keyboard_input[KEY_E];
-			game_input.was_down[LOWER_CAM] = old_input->keyboard_input[KEY_Q];
+				if(!camera.use_mouse_controls)
+				{
+					game_input.move_input[TILT_CAM_UP]    = new_input->keyboard_input[KEY_UP];
+					game_input.move_input[TILT_CAM_DOWN]  = new_input->keyboard_input[KEY_DOWN];
+					game_input.move_input[TURN_CAM_LEFT]  = new_input->keyboard_input[KEY_LEFT];
+					game_input.move_input[TURN_CAM_RIGHT] = new_input->keyboard_input[KEY_RIGHT];
+				}
+				else 
+				{
+					float mouse_dx = new_input->mouse.xpos - old_input->mouse.xpos;
+					float mouse_dy = new_input->mouse.ypos - old_input->mouse.ypos;
+					const float MOUSE_DEFAULT_SENSITIVITY = 0.5f;
+					game_input.move_input[TILT_CAM_UP]    = MAX( mouse_dy * MOUSE_DEFAULT_SENSITIVITY, 0);
+					game_input.move_input[TILT_CAM_DOWN]  = MAX(-mouse_dy * MOUSE_DEFAULT_SENSITIVITY, 0);
+					game_input.move_input[TURN_CAM_LEFT]  = MAX( mouse_dx * MOUSE_DEFAULT_SENSITIVITY, 0);
+					game_input.move_input[TURN_CAM_RIGHT] = MAX(-mouse_dx * MOUSE_DEFAULT_SENSITIVITY, 0);
+				}
+
+				game_input.is_down[JUMP]       = new_input->keyboard_input[KEY_SPACE];
+				game_input.is_down[RAISE_CAM]  = new_input->keyboard_input[KEY_E];
+				game_input.is_down[LOWER_CAM]  = new_input->keyboard_input[KEY_Q];
+				game_input.was_down[JUMP]      = old_input->keyboard_input[KEY_SPACE];
+				game_input.was_down[RAISE_CAM] = old_input->keyboard_input[KEY_E];
+				game_input.was_down[LOWER_CAM] = old_input->keyboard_input[KEY_Q];
+			}
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Move player
 		if(!freecam_mode) update_player(&player, game_input, camera, dt);
-		if(player.pos.y<0){
+		if(player.pos.y < 0){
 			player.is_jumping = false;
 			player.is_on_ground = true;
 			player.pos.y = 0;

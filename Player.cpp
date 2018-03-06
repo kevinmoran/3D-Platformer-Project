@@ -83,7 +83,7 @@ void update_player(Player* player, GameInput &game_input, const Camera3D &camera
             rotation_amount = MIN(rotation_amount, angle_remaining); //Clamp so we never rotate past target
 
             vec3 cross_prod = cross(player->fwd, player_movement_dir);
-            if(cross_prod.y<0) rotation_amount *= -1;
+            if(cross_prod.y < 0) rotation_amount *= -1;
             
             player->R = rotate_y_deg_mat4(rotation_amount) * player->R;
             player->fwd = -vec3{player->R.m[8], player->R.m[9], player->R.m[10]};
@@ -100,7 +100,7 @@ void update_player(Player* player, GameInput &game_input, const Camera3D &camera
         if(player_speed > player_top_speed){
             player->vel = player->vel*player_top_speed/player_speed;
         }
-        if(player_speed<0.0001) player->vel = {};
+        if(player_speed < 0.0001) player->vel = {};
 
         //Deceleration
         if(!player_moved) player->vel *= friction_factor;
@@ -114,11 +114,6 @@ void update_player(Player* player, GameInput &game_input, const Camera3D &camera
     }
     else //Player is not on ground 
     {
-        if(player->is_jumping){
-            //If you don't hold jump you don't jump as high
-            if(!game_input.is_down[JUMP] && player->vel.y>0) player->vel.y += player_gravity*dt;
-        }
-
         //Clamp player's xz speed
         vec3 xz_vel = {player->vel.x, 0, player->vel.z};
         if(length(xz_vel) > player_top_speed) {
@@ -127,6 +122,12 @@ void update_player(Player* player, GameInput &game_input, const Camera3D &camera
             player->vel.x = xz_vel.x;
             player->vel.z = xz_vel.z;
         }
+
+        if(player->is_jumping){
+            //If you don't hold jump you don't jump as high
+            if(!game_input.is_down[JUMP] && (player->vel.y > 0)) player->vel.y += player_gravity*dt;
+        }
+        
         player->vel.y += player_gravity*dt;
     }
 

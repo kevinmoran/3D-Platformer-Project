@@ -12,6 +12,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	PlatformData* platform_data = (PlatformData*)glfwGetWindowUserPointer(window);
     RawInput* input = platform_data->new_input;
 
+    input->use_controller = false;
+
     //Immutable input keys:
     bool is_pressed = (action != GLFW_RELEASE);
     switch(key){
@@ -133,6 +135,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	PlatformData* platform_data = (PlatformData*)glfwGetWindowUserPointer(window);
     RawInput* input = platform_data->new_input;
 
+    input->use_controller = false;
+
     bool is_pressed = (action != GLFW_RELEASE);
     switch(button){
         case GLFW_MOUSE_BUTTON_LEFT:  input->mouse.click_left = is_pressed;  return;
@@ -152,6 +156,8 @@ void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos){
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
 	PlatformData* platform_data = (PlatformData*)glfwGetWindowUserPointer(window);
     RawInput* input = platform_data->new_input;
+
+    input->use_controller = false;
 
     input->mouse.xscroll = xoffset;
     input->mouse.yscroll = yoffset;
@@ -186,7 +192,8 @@ void poll_joystick(RawInput* input)
 {
     ControllerState* controller = &input->controller;
     if(!glfwJoystickPresent(GLFW_JOYSTICK_1)){
-        controller = {};        
+        controller = {};
+        input->use_controller = false;   
         return;
     }
 
@@ -234,4 +241,13 @@ void poll_joystick(RawInput* input)
         controller->button[XBOX_BUTTON_DPAD_DOWN]  = polled_button_values[PS4_BUTTON_DPAD_DOWN];
         controller->button[XBOX_BUTTON_DPAD_LEFT]  = polled_button_values[PS4_BUTTON_DPAD_LEFT];
     }  
+
+    for(int i=0; i < XBOX_CONTROLLER_NUM_AXES; ++i){
+        //TODO: Check this deadzone threshold, total guess
+        if(fabs(controller->axis[i]) > 0.1) input->use_controller = true;
+    }
+
+    for(int i=0; i < XBOX_CONTROLLER_NUM_BUTTONS; ++i){
+        if(controller->button[i]) input->use_controller = true;
+    }
 }

@@ -216,6 +216,7 @@ struct ControllerState {
 };
 
 struct RawInput {
+    bool use_controller;
     Mouse mouse;
     bool keyboard_input[KEYBOARD_NUM_KEYS];
     ControllerState controller;
