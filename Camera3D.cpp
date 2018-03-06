@@ -60,16 +60,16 @@ void update_camera(Camera3D* cam, CameraMode cam_mode, GameInput &game_input, ve
         cam->pitch -= game_input.move_input[TILT_CAM_DOWN]*cam->turn_speed*dt;			
     }
 
-    while(cam->yaw >=360.f) 
+    while(cam->yaw >= 360.f) 
         cam->yaw -= 360.f;
 
     cam->pitch = CLAMP(cam->pitch, -85, 80);
 
     //Update matrices
     mat4 R = rotate_y_deg_mat4(cam->yaw) * rotate_x_deg_mat4(cam->pitch);
-    cam->rgt = (R*vec4{1,0,0,0}).xyz;
-    cam->up  = (R*vec4{0,1,0,0}).xyz;
-    cam->fwd = (R*vec4{0,0,-1,0}).xyz;
+    cam->rgt = {R.m[0], R.m[1], R.m[2]};
+    cam->up  = {R.m[4], R.m[5], R.m[6]};
+    cam->fwd = {-R.m[8], -R.m[9], -R.m[10]};
 
     if(cam_mode == CAM_MODE_FOLLOW_PLAYER)
         cam->pos = player_pos - (5*cam->fwd) + (2*cam->up);
