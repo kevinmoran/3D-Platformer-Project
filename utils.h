@@ -36,15 +36,16 @@ typedef double f64;
 
 #define assert(exp) \
 {if(!(exp)) { \
-	printf("Assertion failed in %s, Line %d:\n%s\n...", __FILE__, __LINE__, #exp); \
+    printf("Assertion failed in %s, Line %d:\n%s\n...", __FILE__, __LINE__, #exp); \
 	_BREAKPOINT_CALL; \
 }}
 
 void copy_memory(void *dest, void *src, size_t n)
 {
-   uint8* src_bytes = (uint8*)src;
-   uint8* dest_bytes = (uint8*)dest;
+    uint8* src_bytes = (uint8*)src;
+    uint8* dest_bytes = (uint8*)dest;
+    assert(((dest_bytes - src_bytes) > n) || ((src_bytes - dest_bytes) > n));
  
-   for (uint32 i = 0; i < n; ++i)
-       dest_bytes[i] = src_bytes[i];
+    for (uint32 i = 0; i < n; ++i)
+        dest_bytes[i] = src_bytes[i];
 }

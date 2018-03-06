@@ -194,6 +194,7 @@ int main(){
 		//Process raw input
 		{
 			ControllerState* controller = &new_input->controller;
+			ControllerState* old_controller = &old_input->controller;
 
 			// TODO: Clever way of deciding whether to prioritise controller or keyboard
 			if(controller->is_initialised)
@@ -211,9 +212,12 @@ int main(){
 				game_input.move_input[TILT_CAM_DOWN]  = CLAMP(-controller->axis[XBOX_RIGHT_STICK_VERT], 0, 1);
 				game_input.move_input[TURN_CAM_LEFT]  = CLAMP(-controller->axis[XBOX_RIGHT_STICK_HOR], 0, 1);
 				game_input.move_input[TURN_CAM_RIGHT] = CLAMP( controller->axis[XBOX_RIGHT_STICK_HOR], 0, 1);
-				game_input.button_input[JUMP]         = controller->button[XBOX_BUTTON_A];
-				game_input.button_input[RAISE_CAM]    = controller->button[XBOX_BUTTON_RB];
-				game_input.button_input[LOWER_CAM]    = controller->button[XBOX_BUTTON_LB];
+				game_input.is_down[JUMP]              = controller->button[XBOX_BUTTON_A];
+				game_input.is_down[RAISE_CAM]         = controller->button[XBOX_BUTTON_RB];
+				game_input.is_down[LOWER_CAM]         = controller->button[XBOX_BUTTON_LB];
+				game_input.was_down[JUMP]             = old_controller->button[XBOX_BUTTON_A];
+				game_input.was_down[RAISE_CAM]        = old_controller->button[XBOX_BUTTON_RB];
+				game_input.was_down[LOWER_CAM]        = old_controller->button[XBOX_BUTTON_LB];
 			}
 			
 			game_input.move_input[MOVE_FORWARD] = new_input->keyboard_input[KEY_W];
@@ -238,9 +242,12 @@ int main(){
 				game_input.move_input[TURN_CAM_RIGHT] = MAX(-mouse_dx * MOUSE_DEFAULT_SENSITIVITY, 0);
 			}
 
-			game_input.button_input[JUMP]      = new_input->keyboard_input[KEY_SPACE];
-			game_input.button_input[RAISE_CAM] = new_input->keyboard_input[KEY_E];
-			game_input.button_input[LOWER_CAM] = new_input->keyboard_input[KEY_Q];
+			game_input.is_down[JUMP]       = new_input->keyboard_input[KEY_SPACE];
+			game_input.is_down[RAISE_CAM]  = new_input->keyboard_input[KEY_E];
+			game_input.is_down[LOWER_CAM]  = new_input->keyboard_input[KEY_Q];
+			game_input.was_down[JUMP]      = old_input->keyboard_input[KEY_SPACE];
+			game_input.was_down[RAISE_CAM] = old_input->keyboard_input[KEY_E];
+			game_input.was_down[LOWER_CAM] = old_input->keyboard_input[KEY_Q];
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

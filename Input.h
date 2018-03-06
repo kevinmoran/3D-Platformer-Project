@@ -223,7 +223,8 @@ struct RawInput {
 
 struct GameInput {
     float move_input[NUM_MOVE_INPUTS];
-    bool button_input[NUM_BUTTON_INPUTS];
+    bool is_down[NUM_BUTTON_INPUTS];
+    bool was_down[NUM_BUTTON_INPUTS];
 };
 
 //Use Command instead of Control on Mac

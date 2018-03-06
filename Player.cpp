@@ -19,7 +19,8 @@ static float player_jump_dist_to_peak = 2.0f; //how far on xz-plane the player m
 static float player_gravity = -2*player_jump_height*player_top_speed*player_top_speed/(player_jump_dist_to_peak*player_jump_dist_to_peak);
 static float jump_vel = 2*player_jump_height*player_top_speed/player_jump_dist_to_peak;
 
-void init_player(Player* player){
+void init_player(Player* player)
+{
     player->pos = {};
     player->scale = {0.25, 0.5, 0.25};
     player->R = identity_mat4();
@@ -31,8 +32,8 @@ void init_player(Player* player){
     player->colour = {0.1f, 0.8f, 0.3f, 1.0f};
 }
 
-void update_player(Player* player, GameInput &game_input, const Camera3D &camera, double dt){
-
+void update_player(Player* player, GameInput &game_input, const Camera3D &camera, double dt)
+{
     bool player_moved = false;
 
     //WASD Movement (constrained to the x-z plane)
@@ -92,7 +93,8 @@ void update_player(Player* player, GameInput &game_input, const Camera3D &camera
     //Accelerate player
     player->vel += player_movement_dir*player_acc*dt;
 
-    if(player->is_on_ground){
+    if(player->is_on_ground)
+    {
         //Clamp player speed
         float player_speed = length(player->vel);
         if(player_speed > player_top_speed){
@@ -103,21 +105,18 @@ void update_player(Player* player, GameInput &game_input, const Camera3D &camera
         //Deceleration
         if(!player_moved) player->vel *= friction_factor;
 
-        static bool jump_button_was_pressed = false;
-        if(game_input.button_input[JUMP]){
-            if(!jump_button_was_pressed){
-                player->vel.y += jump_vel;
-                player->is_on_ground = false;
-                player->is_jumping = true;
-                jump_button_was_pressed = true;
-            }
+        if(game_input.is_down[JUMP] && !game_input.was_down[JUMP])
+        {
+            player->vel.y += jump_vel;
+            player->is_on_ground = false;
+            player->is_jumping = true;
         }
-        else jump_button_was_pressed = false;
     }
-    else { //Player is not on ground
+    else //Player is not on ground 
+    {
         if(player->is_jumping){
             //If you don't hold jump you don't jump as high
-            if(!game_input.button_input[JUMP] && player->vel.y>0) player->vel.y += player_gravity*dt;
+            if(!game_input.is_down[JUMP] && player->vel.y>0) player->vel.y += player_gravity*dt;
         }
 
         //Clamp player's xz speed

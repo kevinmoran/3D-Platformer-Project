@@ -39,10 +39,10 @@ void update_camera(Camera3D* cam, CameraMode cam_mode, GameInput &game_input, ve
             cam->pos += xz_proj*cam->move_speed*dt;			
         }
         //Increase/decrease elevation
-        if(game_input.button_input[RAISE_CAM]) {
+        if(game_input.is_down[RAISE_CAM]) {
             cam->pos.y += cam->move_speed*dt;			
         }
-        if(game_input.button_input[LOWER_CAM]) {
+        if(game_input.is_down[LOWER_CAM]) {
             cam->pos.y -= cam->move_speed*dt;			
         }
     }
