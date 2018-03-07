@@ -41,13 +41,13 @@ int main(){
 
 	//Load player mesh
 	GLuint player_vao;
-	unsigned int player_num_indices = 0;
+	uint32 player_num_indices = 0;
 	{
 		float* vp = NULL;
 		float* vn = NULL;
 		float* vt = NULL;
-		uint16_t* indices = NULL;
-		unsigned int num_verts = 0;
+		uint16* indices = NULL;
+		uint32 num_verts = 0;
 		load_obj_indexed("capsule.obj", &vp, &vt, &vn, &indices, &num_verts, &player_num_indices);
 
 		glGenVertexArrays(1, &player_vao);
@@ -74,19 +74,19 @@ int main(){
 		GLuint index_vbo;
 		glGenBuffers(1, &index_vbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_vbo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, player_num_indices*sizeof(uint16_t), indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, player_num_indices*sizeof(uint16), indices, GL_STATIC_DRAW);
 		free(indices);
 	}
 
 	//Load cube mesh
 	GLuint cube_vao;
-	unsigned int cube_num_indices = 0;
+	uint32 cube_num_indices = 0;
 	{
 		float* vp = NULL;
 		float* vn = NULL;
 		float* vt = NULL;
-		uint16_t* indices = NULL;
-		unsigned int num_verts = 0;
+		uint16* indices = NULL;
+		uint32 num_verts = 0;
 		load_obj_indexed("cube.obj", &vp, &vt, &vn, &indices, &num_verts, &cube_num_indices);
 
 		glGenVertexArrays(1, &cube_vao);
@@ -113,7 +113,7 @@ int main(){
 		GLuint index_vbo;
 		glGenBuffers(1, &index_vbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_vbo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_num_indices*sizeof(uint16_t), indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_num_indices*sizeof(uint16), indices, GL_STATIC_DRAW);
 		free(indices);
 	}
 
@@ -146,23 +146,22 @@ int main(){
 		if(dt > 0.1) dt = 0.1;
 		
 		//Get Input
-		copy_memory(platform_data.old_input, platform_data.new_input, sizeof(RawInput));
+		RawInput* new_input = platform_data.new_input;
+		RawInput* old_input = platform_data.old_input;
+		copy_memory(old_input, new_input, sizeof(RawInput));
 		glfwPollEvents();
 
 		{
-			vec2 new_mouse_pos = {(f32)platform_data.new_input->mouse.xpos, (f32)platform_data.new_input->mouse.ypos};
-			vec2 old_mouse_pos = {(f32)platform_data.old_input->mouse.xpos, (f32)platform_data.old_input->mouse.ypos};
+			vec2 new_mouse_pos = {(f32)new_input->mouse.xpos, (f32)new_input->mouse.ypos};
+			vec2 old_mouse_pos = {(f32)old_input->mouse.xpos, (f32)old_input->mouse.ypos};
 
 			//TODO: this threshold is completely ad-hoc, check it
 			const float MOUSE_MOVED_INTENTIONALLY_THRESHOLD = 25.0f;
 			if(length2(new_mouse_pos - old_mouse_pos) > MOUSE_MOVED_INTENTIONALLY_THRESHOLD) 
-				platform_data.new_input->use_controller = false;
+				new_input->use_controller = false;
 		}
 
-		poll_joystick(platform_data.new_input);
-
-		RawInput* new_input = platform_data.new_input;
-		RawInput* old_input = platform_data.old_input;
+		poll_joystick(new_input);
 
 		if(new_input->use_controller != old_input->use_controller)
 			printf(new_input->use_controller ? "Use Controller\n" : "Don't Use Controller\n");
@@ -191,16 +190,15 @@ int main(){
 				if(glfwGetKey(window, CTRL_KEY_LEFT) || glfwGetKey(window, CTRL_KEY_RIGHT))
 				{
 					window_data.is_fullscreen = !window_data.is_fullscreen;
-					static int old_win_x, old_win_y, old_win_w, old_win_h;
 					if(window_data.is_fullscreen)
 					{
-						glfwGetWindowPos(window, &old_win_x, &old_win_y);
-						glfwGetWindowSize(window, &old_win_w, &old_win_h);
+						glfwGetWindowPos(window, &window_data.old_win_x, &window_data.old_win_y);
+						glfwGetWindowSize(window, &window_data.old_win_w, &window_data.old_win_h);
 						GLFWmonitor* mon = glfwGetPrimaryMonitor();
 						const GLFWvidmode* vidMode = glfwGetVideoMode(mon);
 						glfwSetWindowMonitor(window, mon, 0, 0, vidMode->width, vidMode->height, vidMode->refreshRate);
 					}
-					else glfwSetWindowMonitor(window, NULL, old_win_x, old_win_y, old_win_w, old_win_h, GLFW_DONT_CARE);
+					else glfwSetWindowMonitor(window, NULL, window_data.old_win_x, window_data.old_win_y, window_data.old_win_w, window_data.old_win_h, GLFW_DONT_CARE);
 				}
 			}
 		}

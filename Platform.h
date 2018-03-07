@@ -10,6 +10,7 @@ struct WindowData
 	int height;
 	float aspect_ratio;
 	bool is_fullscreen;
+	int old_win_x, old_win_y, old_win_w, old_win_h; //for restoring from fullscreen
 };
 
 struct PlatformData
