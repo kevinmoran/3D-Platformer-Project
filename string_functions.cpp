@@ -40,3 +40,13 @@ void concat_strings(const char *s1, const char *s2, char *dest)
     }
     *dest = '\0';
 }
+
+void copy_string(const char* src, char* dest, size_t dest_length)
+{
+    size_t count = 0;
+    while(src && (count < dest_length - 1)){
+        *dest++ = *src++;
+        ++count;
+    }
+    *dest = '\0';
+}

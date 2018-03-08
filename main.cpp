@@ -16,6 +16,7 @@
 #include "Player.h"
 #include "load_obj.h"
 #include "DebugDrawing.h"
+#include "Mesh.h"
 
 #include "Input.cpp"
 #include "Camera3D.cpp"
@@ -24,6 +25,7 @@
 #include "load_obj.cpp"
 #include "DebugDrawing.cpp"
 #include "string_functions.cpp"
+#include "Mesh.cpp"
 
 int main(){
 	GLFWwindow* window = NULL;
@@ -39,83 +41,11 @@ int main(){
 
 	if(!init_gl(&platform_data, "3D Platformer")){ return 1; }
 
-	//Load player mesh
-	GLuint player_vao;
-	uint32 player_num_indices = 0;
-	{
-		float* vp = NULL;
-		float* vn = NULL;
-		float* vt = NULL;
-		uint16* indices = NULL;
-		uint32 num_verts = 0;
-		load_obj_indexed("capsule.obj", &vp, &vt, &vn, &indices, &num_verts, &player_num_indices);
-
-		glGenVertexArrays(1, &player_vao);
-		glBindVertexArray(player_vao);
-		
-		GLuint points_vbo;
-		glGenBuffers(1, &points_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-		glBufferData(GL_ARRAY_BUFFER, num_verts*3*sizeof(float), vp, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(VP_ATTRIB_LOC);
-		glVertexAttribPointer(VP_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		free(vp);
-
-		free(vt);
-
-		GLuint normals_vbo;
-		glGenBuffers(1, &normals_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, normals_vbo);
-		glBufferData(GL_ARRAY_BUFFER, num_verts*3*sizeof(float), vn, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(VN_ATTRIB_LOC);
-		glVertexAttribPointer(VN_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		free(vn);
-
-		GLuint index_vbo;
-		glGenBuffers(1, &index_vbo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_vbo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, player_num_indices*sizeof(uint16), indices, GL_STATIC_DRAW);
-		free(indices);
-	}
-
-	//Load cube mesh
-	GLuint cube_vao;
-	uint32 cube_num_indices = 0;
-	{
-		float* vp = NULL;
-		float* vn = NULL;
-		float* vt = NULL;
-		uint16* indices = NULL;
-		uint32 num_verts = 0;
-		load_obj_indexed("cube.obj", &vp, &vt, &vn, &indices, &num_verts, &cube_num_indices);
-
-		glGenVertexArrays(1, &cube_vao);
-		glBindVertexArray(cube_vao);
-		
-		GLuint points_vbo;
-		glGenBuffers(1, &points_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-		glBufferData(GL_ARRAY_BUFFER, num_verts*3*sizeof(float), vp, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(VP_ATTRIB_LOC);
-		glVertexAttribPointer(VP_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		free(vp);
-
-		free(vt);
-
-		GLuint normals_vbo;
-		glGenBuffers(1, &normals_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, normals_vbo);
-		glBufferData(GL_ARRAY_BUFFER, num_verts*3*sizeof(float), vn, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(VN_ATTRIB_LOC);
-		glVertexAttribPointer(VN_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		free(vn);
-
-		GLuint index_vbo;
-		glGenBuffers(1, &index_vbo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_vbo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_num_indices*sizeof(uint16), indices, GL_STATIC_DRAW);
-		free(indices);
-	}
+	//Load meshes
+	Mesh player_mesh;
+	load_mesh(&player_mesh, "capsule.obj");
+	Mesh cube_mesh;
+	load_mesh(&cube_mesh, "cube.obj");
 
 	Camera3D camera = {};
 	init_camera(&camera, vec3{0,2,5}, vec3{0,0,0});
@@ -291,16 +221,16 @@ int main(){
 		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, camera.P.m);
 
 		//Draw player
-		glBindVertexArray(player_vao);
+		glBindVertexArray(player_mesh.vao);
 		glUniform4fv(colour_loc, 1, player.colour.v);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player.M.m);
-        glDrawElements(GL_TRIANGLES, player_num_indices, GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, player_mesh.num_indices, GL_UNSIGNED_SHORT, 0);
 
 		//Draw ground
-		glBindVertexArray(cube_vao);
+		glBindVertexArray(cube_mesh.vao);
 		glUniform4fv(colour_loc, 1, vec4{0.8f, 0.1f, 0.2f, 1}.v);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale_mat4(vec3{25, 0.1, 25}), vec3{0, -0.25 ,0}).m);
-        glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, cube_mesh.num_indices, GL_UNSIGNED_SHORT, 0);
 
 		//Draw some boxes
 		glUniform4fv(colour_loc, 1, vec4{0.2f, 0.1f, 0.8f, 1}.v);
@@ -317,7 +247,7 @@ int main(){
 
 		for(int32 i=0; i < NUM_BOXES; ++i){
 			glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, box_model_mat[i].m);
-			glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
+			glDrawElements(GL_TRIANGLES, cube_mesh.num_indices, GL_UNSIGNED_SHORT, 0);
 		}
 
 		debug_draw_flush(&debug_draw_data, camera);
