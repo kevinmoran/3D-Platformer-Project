@@ -75,7 +75,7 @@ void update_player(Player* player, GameInput &game_input, const Camera3D &camera
     if(length2(player_movement_dir)>0.00001)
     {
         float alignment = CLAMP(dot(player->fwd, player_movement_dir), -1, 1);
-        if(!cmpf(alignment, 1, 0.00001))
+        if(!almost_equal(alignment, 1, 0.00001))
         {
             float rotation_amount = player_turn_speed*dt;
             float angle_remaining = RAD2DEG(acosf(alignment));

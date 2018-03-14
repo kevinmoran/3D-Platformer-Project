@@ -20,9 +20,11 @@
 | This is C++ because it's sort-of convenient to be able to use maths operators|
 \******************************************************************************/
 
-#define _USE_MATH_DEFINES
 #include <stdio.h>
 #include <math.h>
+
+#define PI32 3.14159274f
+#define PI64 3.1415926535897931
 
 //------------------------------------------------------------------------------
 // Useful functions
@@ -32,15 +34,15 @@
 #define CLAMP(x,lo,hi) (MIN ((hi), MAX ((lo), (x))))
 
 //Compare two floats for equality
-inline bool cmpf(float a, float b, float eps = 0.000001f) {
+inline bool almost_equal(float a, float b, float eps = 0.000001f) {
 	return (fabs(a-b) < eps);
 }
 
 inline float DEG2RAD(float degs) {
-	return degs*(M_PI/180.0);
+	return degs*(PI32/180.0);
 }
 inline float RAD2DEG(float rads) {
-	return rads*(180.0/M_PI);
+	return rads*(180.0/PI32);
 }
 
 //------------------------------------------------------------------------------
@@ -262,7 +264,7 @@ inline vec2 operator- (vec2 rhs) {
 	return result;
 }
 inline bool operator== (vec2 lhs, vec2 rhs) {
-	bool result = (cmpf(lhs.x, rhs.x) && cmpf(lhs.y, rhs.y));
+	bool result = (almost_equal(lhs.x, rhs.x) && almost_equal(lhs.y, rhs.y));
 	return result;
 }
 
@@ -328,7 +330,7 @@ inline vec3 operator- (vec3 rhs) {
 	return result;
 }
 inline bool operator== (vec3 lhs, vec3 rhs) {
-	bool result = (cmpf(lhs.x, rhs.x) && cmpf(lhs.y, rhs.y) && cmpf(lhs.z, rhs.z));
+	bool result = (almost_equal(lhs.x, rhs.x) && almost_equal(lhs.y, rhs.y) && almost_equal(lhs.z, rhs.z));
 	return result;
 }
 
@@ -802,7 +804,7 @@ inline mat4 rotate_align_mat4(vec3 u1, vec3 u2){
 	float cos_a = dot(u1,u2);
     float k = 1.0f/(1.0f+cos_a);
 
-	if(cmpf(cos_a,-1)) //vectors are opposite
+	if(almost_equal(cos_a,-1)) //vectors are opposite
 		return scale(identity_mat4(),-1);
 
 	return mat4{
@@ -978,7 +980,7 @@ inline versor normalise(versor q) {
 				   (q.q[2] * q.q[2]) + (q.q[3] * q.q[3]);
 	
 	const float thresh = 0.0001f;
-	if(cmpf(mag_sq, 1.0f, thresh)) {
+	if(almost_equal(mag_sq, 1.0f, thresh)) {
 		result = result / sqrtf(mag_sq);
 	}
 	return result;
