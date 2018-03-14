@@ -10,8 +10,8 @@ CXX = g++
 COMPILER_FLAGS = -Wall -pedantic -std=gnu++11
 
 #Debug/Release build flags
-DEBUG_FLAGS = -g -DDEBUG
-RELEASE_FLAGS = -O3
+DEBUG_FLAGS = -g -DDEBUG_BUILD=1
+RELEASE_FLAGS = -O3 -DDEBUG_BUILD=0
 
 #Platform-specific flags
 FLAGS_WIN32 = 

@@ -28,17 +28,20 @@ typedef double f64;
 #define local_persist static
 
 //Custom assert function which pauses program in debugger instead of crashing
+#if DEBUG_BUILD 
 #if defined(__clang__) || defined(__GNUC__)
 #define _BREAKPOINT_CALL __asm__ volatile("int $0x03")
 #elif defined(_MSC_VER_)
 #define _BREAKPOINT_CALL __debugbreak()
 #endif
-
 #define assert(exp) \
 {if(!(exp)) { \
     printf("Assertion failed in %s, Line %d:\n%s\n...", __FILE__, __LINE__, #exp); \
 	_BREAKPOINT_CALL; \
 }}
+#else
+#define assert(exp)
+#endif
 
 void copy_memory(void *dest, void *src, size_t n)
 {
