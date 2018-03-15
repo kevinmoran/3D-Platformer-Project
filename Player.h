@@ -18,4 +18,4 @@ struct Player {
 };
 
 void init_player(Player* player);
-void update_player(Player* player, GameInput &game_input, const Camera3D &camera, double dt);
+void update_player(Player* player, const GameInput &game_input, const Camera3D &camera, double dt);
