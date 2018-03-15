@@ -250,4 +250,4 @@ void cursor_enter_callback(GLFWwindow* window, int entered);
 
 //Joystick functions
 void init_joystick(ControllerState* controller);
-void poll_joystick(PlatformData* platform_data);
+void poll_joystick(RawInput* input);

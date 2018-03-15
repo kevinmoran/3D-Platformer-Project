@@ -2,6 +2,9 @@
 #include "GameMaths.h"
 #include "Input.h"
 
+#define NEAR_PLANE_Z 0.1f
+#define FAR_PLANE_Z 300.0f
+
 struct Camera3D {
     vec3 pos;
 	vec3 fwd, up, rgt;

@@ -1,9 +1,6 @@
 #include "Camera3D.h"
 #include "Input.h"
 
-#define NEAR_PLANE_Z 0.1f
-#define FAR_PLANE_Z 300.0f
-
 void init_camera(Camera3D* cam, vec3 cam_pos, vec3 target_pos){
     cam->pos = cam_pos;
     cam->V = look_at(cam_pos, target_pos, vec3{0,1,0});
