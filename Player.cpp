@@ -17,7 +17,7 @@ void init_player(Player* player)
     player->colour = {0.1f, 0.8f, 0.3f, 1.0f};
 }
 
-void update_player(Player* player, const GameInput &game_input, const Camera3D &camera, double dt)
+void update_player(Player* player, const GameInput &game_input, const Camera3D &camera, float dt)
 {
     vec3 player_move_dir = {};
     vec3 cam_fwd_xz_proj = normalise(vec3{camera.fwd.x, 0.0f, camera.fwd.z});

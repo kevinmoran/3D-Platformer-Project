@@ -21,4 +21,4 @@ enum CameraMode {
 
 void init_camera(Camera3D* cam, vec3 cam_pos, vec3 target_pos);
 void init_camera(Camera3D* cam, vec3 cam_pos);
-void update_camera(Camera3D* cam, CameraMode cam_mode, GameInput &game_input, vec3 player_pos, double dt);
+void update_camera(Camera3D* cam, CameraMode cam_mode, GameInput &game_input, vec3 player_pos, float dt);

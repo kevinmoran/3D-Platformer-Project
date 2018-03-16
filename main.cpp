@@ -71,8 +71,8 @@ int main(){
 		//Get dt
 		double prev_time = curr_time;
 		curr_time = glfwGetTime();
-		double dt = curr_time - prev_time;
-		if(dt > 0.1) dt = 0.1;
+		float dt = (float)(curr_time - prev_time);
+		if(dt > 0.1f) dt = 0.1f;
 		
 		//Get Input
 		RawInput* new_input = platform_data.new_input;
