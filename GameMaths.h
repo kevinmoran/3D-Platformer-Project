@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define PI32 3.14159274f
+#define PI32 3.14159265359f
 #define PI64 3.1415926535897931
 
 //------------------------------------------------------------------------------
@@ -39,10 +39,10 @@ inline bool almost_equal(float a, float b, float eps = 0.000001f) {
 }
 
 inline float DEG2RAD(float degs) {
-	return degs*(PI32/180.0);
+	return degs * (PI32 / 180.0f);
 }
 inline float RAD2DEG(float rads) {
-	return rads*(180.0/PI32);
+	return rads * (180.0f / PI32);
 }
 
 //------------------------------------------------------------------------------
@@ -331,6 +331,40 @@ inline vec3 operator- (vec3 rhs) {
 }
 inline bool operator== (vec3 lhs, vec3 rhs) {
 	bool result = (almost_equal(lhs.x, rhs.x) && almost_equal(lhs.y, rhs.y) && almost_equal(lhs.z, rhs.z));
+	return result;
+}
+
+//vec4
+inline vec4 operator+ (vec4 lhs, vec4 rhs) {
+	vec4 result;
+	result.x = lhs.x + rhs.x;
+	result.y = lhs.y + rhs.y;
+	result.z = lhs.z + rhs.z;
+	result.w = lhs.w + rhs.w;
+	return result;
+}
+inline vec4 operator- (vec4 lhs, vec4 rhs) {
+	vec4 result;
+	result.x = lhs.x - rhs.x;
+	result.y = lhs.y - rhs.y;
+	result.z = lhs.z - rhs.z;
+	result.w = lhs.w - rhs.w;
+	return result;
+}
+inline vec4 operator* (vec4 lhs, float rhs) {
+	vec4 result;
+	result.x = lhs.x * rhs;
+	result.y = lhs.y * rhs;
+	result.z = lhs.z * rhs;
+	result.w = lhs.w * rhs;
+	return result;
+}
+inline vec4 operator* (float lhs, vec4 rhs) {
+	vec4 result;
+	result.x = rhs.x * lhs;
+	result.y = rhs.y * lhs;
+	result.z = rhs.z * lhs;
+	result.w = rhs.w * lhs;
 	return result;
 }
 
@@ -719,17 +753,54 @@ inline mat4 rotate_x_deg_mat4(float deg) {
 	return result;
 }
 
-// Returns matrix m rotated about y-axis by deg degrees
-inline mat4 rotate_y_deg(mat4 m, float deg) {
-	float rad = DEG2RAD(deg);
-	mat4 m_r = identity_mat4();
+// Returns matrix m rotated about y-axis by rad radians
+inline mat4 rotate_y_rad(mat4 m, float rad) 
+{
+	/*  
+	  cos_t  0  sin_t  0           a e i m
+	      0  1      0  0           b f j n
+	 -sin_t  0  cos_t  0           c g k o
+	      0  0      0  1           d h l p
+
+	(acos_t + csin_t) (ecos_t + gsin_t) (icos_t + ksin_t) (mcos_t + osin_t)
+	b f j n
+	(a(-sin_t) + ccos_t) (e(-sin_t) + gcos_t) (i(-sin_t) + kcos_t) (m(-sin_t) + ocos_t)
+	d h l p
+	*/
+	mat4 result = m;
 	float sin_theta = sinf(rad);
 	float cos_theta = cosf(rad);
-	m_r.m[0] = cos_theta;
-	m_r.m[8] = sin_theta;
-	m_r.m[2] = -sin_theta;
-	m_r.m[10] = cos_theta;
-	return m_r * m;
+
+	vec4 row0 = {result.m[0], result.m[4], result.m[8], result.m[12]}; // a e i m
+	vec4 row2 = {result.m[2], result.m[6], result.m[10], result.m[14]}; // c g k o
+
+	vec4 row0_cos_theta = cos_theta * row0;
+	vec4 row2_cos_theta = cos_theta * row2;
+	vec4 row0_sin_theta = sin_theta * row0;
+	vec4 row2_sin_theta = sin_theta * row2;
+
+	vec4 result_row0 = row0_cos_theta + row2_sin_theta;
+	vec4 result_row2 = row2_cos_theta - row0_sin_theta;
+
+	result.m[0]  = result_row0.x;
+	result.m[4]  = result_row0.y;
+	result.m[8]  = result_row0.z;
+	result.m[12] = result_row0.w;
+
+	result.m[2]  = result_row2.x;
+	result.m[6]  = result_row2.y;
+	result.m[10] = result_row2.z;
+	result.m[14] = result_row2.w;
+
+	return result;
+}
+
+// Returns matrix m rotated about y-axis by deg degrees
+inline mat4 rotate_y_deg(mat4 m, float deg) 
+{
+	float rad = DEG2RAD(deg);
+	mat4 result = rotate_y_rad(m, rad);
+	return result;
 }
 
 // Returns matrix to rotate about y-axis by deg degrees
