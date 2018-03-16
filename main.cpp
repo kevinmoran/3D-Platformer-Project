@@ -28,7 +28,7 @@
 
 int main(){
 	GLFWwindow* window = NULL;
-	WindowData window_data = {};
+	GLFWWindowData window_data = {};
 	window_data.handle = &window;
 	window_data.width = 400;
 	window_data.height = 300;
@@ -36,9 +36,9 @@ int main(){
 
 	RawInput raw_input[2] = {};
 
-	PlatformData platform_data = {&window_data, &raw_input[0], &raw_input[1]};
+	GLFWData glfw_data = {&window_data, &raw_input[0], &raw_input[1]};
 
-	if(!init_gl(&platform_data, "3D Platformer")){ return 1; }
+	if(!init_gl(&glfw_data, "3D Platformer")){ return 1; }
 
 	//Load meshes
 	Mesh player_mesh;
@@ -75,8 +75,8 @@ int main(){
 		if(dt > 0.1f) dt = 0.1f;
 		
 		//Get Input
-		RawInput* new_input = platform_data.new_input;
-		RawInput* old_input = platform_data.old_input;
+		RawInput* new_input = glfw_data.new_input;
+		RawInput* old_input = glfw_data.old_input;
 		copy_memory(old_input, new_input, sizeof(RawInput));
 		glfwPollEvents();
 
@@ -213,7 +213,7 @@ int main(){
 
 		camera.P = perspective(90, window_data.aspect_ratio, NEAR_PLANE_Z, FAR_PLANE_Z);
 
-		add_vec(&debug_draw_data, player.pos+vec3{0,0.75,0}, player.fwd);
+		add_vec(&debug_draw_data, player.pos + vec3{0, 0.75f, 0}, player.fwd);
 
 		glUseProgram(basic_shader.id);
 		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, camera.V.m);

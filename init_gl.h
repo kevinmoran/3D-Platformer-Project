@@ -3,12 +3,12 @@
 #include <stdio.h>
 
 #include "gl_lite.h"
-#include "Platform.h"
+#include "GLFWData.h"
 #include "Input.h"
 
 void window_resize_callback(GLFWwindow* window, int width, int height);
 
-bool init_gl(PlatformData* platform_data, const char* title)
+bool init_gl(GLFWData* glfw_data, const char* title)
 {
 	/* start GL context and O/S window using the GLFW helper library */
 	if(!glfwInit()) {
@@ -24,9 +24,9 @@ bool init_gl(PlatformData* platform_data, const char* title)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	#endif
 
-	GLFWwindow** window = platform_data->window->handle;
+	GLFWwindow** window = glfw_data->window->handle;
 
-	*window = glfwCreateWindow(platform_data->window->width, platform_data->window->height, title, NULL, NULL);
+	*window = glfwCreateWindow(glfw_data->window->width, glfw_data->window->height, title, NULL, NULL);
 	if(!(*window)) {
 		fprintf(stderr, "Error: glfwCreateWindow failed\n");
 		glfwTerminate();
@@ -37,7 +37,7 @@ bool init_gl(PlatformData* platform_data, const char* title)
 	printf("GLFW Version %s\n", glfw_version);
 	glfwMakeContextCurrent(*window);
 
-	glfwSetWindowUserPointer(*window, platform_data);
+	glfwSetWindowUserPointer(*window, glfw_data);
 
 	//Setup callbacks
 	glfwSetKeyCallback(*window, key_callback);
@@ -73,8 +73,8 @@ bool init_gl(PlatformData* platform_data, const char* title)
 }
 
 void window_resize_callback(GLFWwindow* window, int width, int height){
-	PlatformData* platform_data = (PlatformData*)glfwGetWindowUserPointer(window);
-	WindowData* win = platform_data->window;
+	GLFWData* glfw_data = (GLFWData*)glfwGetWindowUserPointer(window);
+	GLFWWindowData* win = glfw_data->window;
 
     win->width = width;
     win->height = height;

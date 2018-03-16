@@ -238,7 +238,7 @@ struct GameInput {
 #endif
 
 struct GLFWwindow;
-struct PlatformData;
+struct GLFWData;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 

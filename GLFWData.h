@@ -3,7 +3,7 @@
 struct GLFWwindow;
 struct RawInput;
 
-struct WindowData
+struct GLFWWindowData
 {
 	GLFWwindow** handle;
 	int width;
@@ -13,9 +13,9 @@ struct WindowData
 	int old_win_x, old_win_y, old_win_w, old_win_h; //for restoring from fullscreen
 };
 
-struct PlatformData
+struct GLFWData
 {
-	WindowData* window;
+	GLFWWindowData* window;
 	RawInput* new_input;
 	RawInput* old_input;
 };
