@@ -432,6 +432,27 @@ inline mat4 operator* (mat4 lhs, mat4 rhs) {
 	}
 	return result;
 }
+inline mat4 operator* (mat4 lhs, float rhs) {
+	mat4 result = lhs;
+	for(int i = 0; i < 16; ++i) {
+		result.m[i] *= rhs;
+	}
+	return result;
+}
+inline mat4 operator+ (mat4 lhs, mat4 rhs) {
+	mat4 result = lhs;
+	for(int i = 0; i < 16; ++i) {
+		result.m[i] += rhs.m[i];
+	}
+	return result;
+}
+inline bool operator== (mat4 lhs, mat4 rhs) {
+	for(int i = 0; i < 16; ++i) {
+		if(lhs.m[i] != rhs.m[i])
+			return false;
+	}
+	return true;
+}
 
 // versor
 inline versor operator* (versor lhs, float rhs) {
@@ -895,26 +916,6 @@ inline mat4 rotate_align_mat4(vec3 u1, vec3 u2){
 	};
 }
 
-// Returns matrix m scaled by [x, y, z]
-inline mat4 scale(mat4 m, vec3 v) {
-	mat4 result = m;
-	result.m[0] *= v.x;
-	result.m[1] *= v.x;
-	result.m[2] *= v.x;
-	result.m[3] *= v.x;
-
-	result.m[4] *= v.y;
-	result.m[5] *= v.y;
-	result.m[6] *= v.y;
-	result.m[7] *= v.y;
-
-	result.m[8] *= v.z;
-	result.m[9] *= v.z;
-	result.m[10] *= v.z;
-	result.m[11] *= v.z;
-	return result;
-}
-
 // Returns matrix to scale by [x, y, z]
 inline mat4 scale_mat4(vec3 v) {
 	mat4 result = {};
@@ -925,21 +926,15 @@ inline mat4 scale_mat4(vec3 v) {
 	return result;
 }
 
+// Returns matrix m scaled by [x, y, z]
+inline mat4 scale(mat4 m, vec3 v) {
+	mat4 result = scale_mat4(v) * m;
+	return result;
+}
+
 // Returns matrix m scaled uniformly by s
 inline mat4 scale(mat4 m, float s) {
-	mat4 result = m;
-	result.m[0] *= s;
-	result.m[1] *= s;
-	result.m[2] *= s;
-	result.m[3] *= s;
-	result.m[4] *= s;
-	result.m[5] *= s;
-	result.m[6] *= s;
-	result.m[7] *= s;
-	result.m[8] *= s;
-	result.m[9] *= s;
-	result.m[10] *= s;
-	result.m[11] *= s;
+	mat4 result = scale_mat4(vec3{s, s, s}) * m;
 	return result;
 }
 
