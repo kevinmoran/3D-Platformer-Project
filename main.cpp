@@ -16,6 +16,7 @@
 #include "load_obj.h"
 #include "DebugDrawing.h"
 #include "Mesh.h"
+#include "Animation.h"
 
 #include "Input.cpp"
 #include "Camera3D.cpp"
@@ -25,6 +26,7 @@
 #include "DebugDrawing.cpp"
 #include "string_functions.cpp"
 #include "Mesh.cpp"
+#include "Animation.cpp"
 
 int main(){
 	GLFWwindow* window = NULL;
@@ -34,7 +36,7 @@ int main(){
 	window_data.height = 300;
 	window_data.aspect_ratio = (float)window_data.width/(float)window_data.height;
 
-	RawInput raw_input[2] = {};
+	RawInput* raw_input = (RawInput*)calloc(2, sizeof(RawInput));
 
 	GLFWData glfw_data = {&window_data, &raw_input[0], &raw_input[1]};
 
@@ -59,6 +61,158 @@ int main(){
     //Load shaders
 	Shader basic_shader = init_shader("MVP.vert", "uniform_colour_sunlight.frag");
 	GLuint colour_loc = glGetUniformLocation(basic_shader.id, "colour");
+
+#if 0 // WIP: Animation
+
+	Shader skinningShader = init_shader("Skinning.vert", "uniform_colour_sunlight.frag");
+	int32 pose_mats_locs[MAX_NUM_BONES];
+
+	//Get uniform locations for pose mats
+	{
+		glUseProgram(skinningShader.id);
+		char name[16];
+
+		for (uint32 i = 0; i < MAX_NUM_BONES; i++) {
+			sprintf(name, "poseMats[%u]", i);
+			pose_mats_locs[i] = glGetUniformLocation(skinningShader.id, name);
+			if (pose_mats_locs[i] < 0) {
+				printf("ERROR getting uniform location: '%s' not found in shader\n", name);
+			}
+		}
+	}
+	KmxSkinnedMesh* kmxMesh = NULL;
+	GLuint kmx_vao;
+	uint32 kmx_indexCount;
+	{
+		FILE* fp = fopen("/Users/kevin/Desktop/test.kmx", "rb");
+		assert(fp);
+		fseek(fp, 0, SEEK_END);
+		uint64 file_length = ftell(fp);
+		rewind(fp);
+
+		void* file_bytes = malloc(file_length);
+		assert(file_bytes);
+
+		fread(file_bytes, file_length, 1, fp);
+		fclose(fp);
+
+		kmxMesh = (KmxSkinnedMesh*)file_bytes;
+		assert(kmxMesh->magic == *(uint32*)("KMX "));
+
+		kmx_indexCount = kmxMesh->indexCount;
+
+		uint16* indices = (uint16*)(&kmxMesh->data + kmxMesh->indexOffset);
+		float* vp = (float*)(&kmxMesh->data + kmxMesh->vpOffset);
+		float* vn = (float*)(&kmxMesh->data + kmxMesh->vnOffset);
+		// float* vt = (float*)(&kmxMesh->data + kmxMesh->vtOffset);
+		uint32* vbone_ids = (uint32*)(&kmxMesh->data + kmxMesh->vboneIdOffset);
+		float* vbone_weights = (float*)(&kmxMesh->data + kmxMesh->vboneWeightOffset);
+		// mat4* ibp_mats = (mat4*)(&kmxMesh->data + kmxMesh->inverseBindPosesOffset);
+
+		// for(uint32 i=0; i < kmxMesh->vertCount; ++i)
+		// {
+		// 	printf("%i %i %i %i   ", vbone_ids[4*i], vbone_ids[4*i + 1], vbone_ids[4*i + 2], vbone_ids[4*i + 3]);
+		// 	printf("%f %f %f %f\n", vbone_weights[4*i], vbone_weights[4*i + 1], vbone_weights[4*i + 2], vbone_weights[4*i + 3]);
+		// }
+
+		glGenVertexArrays(1, &kmx_vao);
+        glBindVertexArray(kmx_vao);
+
+		GLuint pos_vbo, norm_vbo, bone_ids_vbo, bone_weights_vbo, index_vbo;
+        
+        glGenBuffers(1, &index_vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_vbo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, kmxMesh->indexCount*sizeof(uint16), indices, GL_STATIC_DRAW);
+
+        glGenBuffers(1, &pos_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
+        glBufferData(GL_ARRAY_BUFFER, kmxMesh->vertCount*3*sizeof(float), vp, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(VP_ATTRIB_LOC);
+        glVertexAttribPointer(VP_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+        glGenBuffers(1, &norm_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, norm_vbo);
+        glBufferData(GL_ARRAY_BUFFER, kmxMesh->vertCount*3*sizeof(float), vn, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(VN_ATTRIB_LOC);
+        glVertexAttribPointer(VN_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+        glGenBuffers(1, &bone_ids_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, bone_ids_vbo);
+        glBufferData(GL_ARRAY_BUFFER, kmxMesh->vertCount*4*sizeof(uint32), vbone_ids, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(VBONE_IDS_ATTRIB_LOC);
+        glVertexAttribIPointer(VBONE_IDS_ATTRIB_LOC, 4, GL_UNSIGNED_INT, 0, NULL);
+
+        glGenBuffers(1, &bone_weights_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, bone_weights_vbo);
+        glBufferData(GL_ARRAY_BUFFER, kmxMesh->vertCount*4*sizeof(float), vbone_weights, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(VBONE_WEIGHTS_ATTRIB_LOC);
+        glVertexAttribPointer(VBONE_WEIGHTS_ATTRIB_LOC, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+
+        check_gl_error();
+	}
+
+	KmxSkeleton* skeleton = NULL;
+	{
+		FILE* fp = fopen("/Users/kevin/Desktop/test_skel2.kmx", "rb");
+		assert(fp);
+		fseek(fp, 0, SEEK_END);
+		uint64 file_length = ftell(fp);
+		rewind(fp);
+
+		void* file_bytes = malloc(file_length);
+		assert(file_bytes);
+		fread(file_bytes, file_length, 1, fp);
+		fclose(fp);
+
+		skeleton = (KmxSkeleton*)file_bytes;
+		assert(skeleton->magic == *(uint32*)("KMX "));
+
+		// KmxBone* bones = (KmxBone*)(&skeleton->data + skeleton->bonesOffset);
+		// KmxAnimation* anims = (KmxAnimation*)(&skeleton->data + skeleton->animationsOffset);
+
+		// printf("Bones:\n");
+		// for(uint32 i=0; i < skeleton->numBones; ++i)
+		// {
+		// 	printf("%u name: %s, parent: %i\n", i, bones[i].name, bones[i].parentIndex);
+		// }
+
+		// printf("Animations:\n");
+		// for(uint32 i=0; i < skeleton->numAnimations; ++i)
+		// {
+		// 	printf("%u name: %s, duration: %f\n", i, anims[i].name, anims[i].duration);
+
+		// 	printf("Keyframe data:\n");
+		// 	KmxBoneKeyFrames* keys = (KmxBoneKeyFrames*)(&skeleton->data + anims[i].keyFramesOffset);
+		// 	for(uint32 boneIndex=0; boneIndex < skeleton->numBones; ++boneIndex)
+		// 	{
+		// 		KmxBoneKeyFrames* currBoneKeyFrames = &keys[boneIndex];
+		// 		printf("Bone %u:\n", boneIndex);
+		// 		float* traKeyTimes = (float*)(&skeleton->data + currBoneKeyFrames->traKeyTimesOffset);
+		// 		vec3* traKeys = (vec3*)(&skeleton->data + currBoneKeyFrames->traKeysOffset);
+
+		// 		for(int k=0; k < currBoneKeyFrames->numTraKeys; ++k)
+		// 		{
+		// 			printf("t: %f, tra: [%f, %f, %f]\n", traKeyTimes[k], traKeys[k].x, traKeys[k].y, traKeys[k].z);
+		// 		}
+
+		// 		float* rotKeyTimes = (float*)(&skeleton->data + currBoneKeyFrames->rotKeyTimesOffset);
+		// 		versor* rotKeys = (versor*)(&skeleton->data + currBoneKeyFrames->rotKeysOffset);
+
+		// 		for(int k=0; k < currBoneKeyFrames->numRotKeys; ++k)
+		// 		{
+		// 			printf("t: %f, rot: [%f, %f, %f, %f]\n", rotKeyTimes[k], rotKeys[k].q[0], rotKeys[k].q[1], rotKeys[k].q[2], rotKeys[k].q[3]);
+		// 		}
+		// 	}
+		// }
+	}
+
+	// mat4* ibp_mats = (mat4*)(&kmxMesh->data + kmxMesh->inverseBindPosesOffset);
+	// for(int i=0; i<skeleton->numBones; ++i){
+	// 	print(ibp_mats[i]);
+	// }
+
+	mat4* poseMats = (mat4*)malloc(skeleton->numBones * sizeof(mat4));
+#endif
 
 	check_gl_error();
 
@@ -211,7 +365,7 @@ int main(){
 		
 		update_camera(&camera, cam_mode, game_input, player.pos, dt);
 
-		camera.P = perspective(90, window_data.aspect_ratio, NEAR_PLANE_Z, FAR_PLANE_Z);
+		camera.P = perspective(90.0f, window_data.aspect_ratio, NEAR_PLANE_Z, FAR_PLANE_Z);
 
 		add_vec(&debug_draw_data, player.pos + vec3{0, 0.75f, 0}, player.fwd);
 
@@ -249,6 +403,63 @@ int main(){
 			glDrawElements(GL_TRIANGLES, cube_mesh.num_indices, GL_UNSIGNED_SHORT, 0);
 		}
 
+#if 0 // WIP: Animation
+		glBindVertexArray(kmx_vao);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(identity_mat4(), vec3{-3,2,0}).m);
+		glDrawElements(GL_TRIANGLES, kmx_indexCount, GL_UNSIGNED_SHORT, 0);
+
+		{
+			static float animTime = 0.0f;
+			animTime += dt;
+
+			uint32 CURRENT_ANIM_INDEX = 1;
+
+			KmxAnimation* animations = (KmxAnimation*)(&skeleton->data + skeleton->animationsOffset);
+			KmxAnimation* animation = &animations[CURRENT_ANIM_INDEX];
+			if(animTime > animation->duration)
+				animTime -= animation->duration;
+
+			mat4* inverseBindPoses = (mat4*)(&kmxMesh->data + kmxMesh->inverseBindPosesOffset);
+
+			animate(*skeleton, CURRENT_ANIM_INDEX, animTime, inverseBindPoses, &poseMats);
+
+			glUseProgram(skinningShader.id);
+
+			// {
+			// 	uint32* vbone_ids = (uint32*)(&kmxMesh->data + kmxMesh->vboneIdOffset);
+			// 	float* vbone_weights = (float*)(&kmxMesh->data + kmxMesh->vboneWeightOffset);
+
+			// 	for(uint32 i=0; i < kmxMesh->vertCount; ++i)
+			// 	{
+			// 		mat4 pose0 = poseMats[vbone_ids[4*i]];
+			// 		mat4 pose1 = poseMats[vbone_ids[4*i + 1]];
+			// 		mat4 pose2 = poseMats[vbone_ids[4*i + 2]];
+			// 		mat4 pose3 = poseMats[vbone_ids[4*i + 3]];
+
+			// 		mat4 pose = pose0 * vbone_weights[4*i]
+			// 				  + pose1 * vbone_weights[4*i + 1]
+			// 				  + pose2 * vbone_weights[4*i + 2]
+			// 				  + pose3 * vbone_weights[4*i + 3];
+
+			// 		assert(pose == identity_mat4());
+			// 	}
+			// 	return 0;
+			// }
+
+			for(uint32 i = 0; i < skeleton->numBones; i++) {
+				glUniformMatrix4fv(pose_mats_locs[i], 1, GL_FALSE, poseMats[i].m);
+			}
+
+			glUniformMatrix4fv(skinningShader.M_loc, 1, GL_FALSE, translate(identity_mat4(), vec3{0,2,0}).m);
+			glUniformMatrix4fv(skinningShader.V_loc, 1, GL_FALSE, camera.V.m);
+			glUniformMatrix4fv(skinningShader.P_loc, 1, GL_FALSE, camera.P.m);
+			glUniform4fv(glGetUniformLocation(skinningShader.id, "colour"), 1, vec4{0.8f, 0.1f, 0.6f, 1}.v);
+
+			glBindVertexArray(kmx_vao);
+			glDrawElements(GL_TRIANGLES, kmx_indexCount, GL_UNSIGNED_SHORT, 0);
+
+		}
+#endif
 		debug_draw_flush(&debug_draw_data, camera);
 
 		glfwSwapBuffers(window);

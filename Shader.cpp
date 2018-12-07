@@ -68,6 +68,8 @@ static bool _load_shader_program(Shader* shader, const char* vert_file, const ch
     glBindAttribLocation(shader->id, VP_ATTRIB_LOC, "vp");
     glBindAttribLocation(shader->id, VT_ATTRIB_LOC, "vt");
     glBindAttribLocation(shader->id, VN_ATTRIB_LOC, "vn");
+    glBindAttribLocation(shader->id, VBONE_IDS_ATTRIB_LOC, "boneIDs");
+    glBindAttribLocation(shader->id, VBONE_WEIGHTS_ATTRIB_LOC, "boneWeights");
 
     glLinkProgram(shader->id);
     

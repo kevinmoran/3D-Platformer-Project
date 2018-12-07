@@ -2,9 +2,12 @@
 
 #include "gl_lite.h"
 
+//TODO: this should be an enum
 #define VP_ATTRIB_LOC 0
 #define VT_ATTRIB_LOC 1
 #define VN_ATTRIB_LOC 2
+#define VBONE_IDS_ATTRIB_LOC 3
+#define VBONE_WEIGHTS_ATTRIB_LOC 4
 
 struct Shader {
     GLuint id;
